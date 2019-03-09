@@ -6,7 +6,7 @@ using namespace std;
 
 enum class BitmapVersion
 {
-	Basic,
+	V1,
 	V4,
 	V5
 };
@@ -22,13 +22,13 @@ struct BitmapHeder
 		BITMAPV5HEADER v5;
 	} info;
 
-	BitmapVersion version = BitmapVersion::Basic;
+	BitmapVersion version = BitmapVersion::V1;
 
 	size_t getInfoSize() const
 	{
 		switch (version)
 		{
-		case BitmapVersion::Basic:
+		case BitmapVersion::V1:
 			return sizeof(BITMAPINFOHEADER);
 		case BitmapVersion::V4:
 			return sizeof(BITMAPV4HEADER);
@@ -78,7 +78,7 @@ public:
 		if (infoSize == sizeof(BITMAPINFOHEADER))
 		{
 			fs.read(reinterpret_cast<char*>(&bmp->m_Header.info), sizeof(BITMAPINFOHEADER));
-			bmp->m_Header.version = BitmapVersion::Basic;
+			bmp->m_Header.version = BitmapVersion::V1;
 		}
 		else if (infoSize == sizeof(BITMAPV4HEADER))
 		{
