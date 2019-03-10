@@ -11,6 +11,8 @@ using namespace std;
 using namespace ragii::image;
 
 
+int convert(vector<pair<string_view, string_view>>& opts);
+
 int main(int argc, char* argv[])
 {
 	if (argc < 2)
@@ -46,68 +48,74 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	if (opts[0].first == "convert")
+	auto command = opts[0].first;
+	opts.erase(opts.begin());
+
+	if (command == "convert")
 	{
-		opts.erase(opts.begin());
-
-		if (opts.empty())
-		{
-			cout << "変換方法を指定してください。 negative, grayscale, etc." << endl;
-			return EXIT_FAILURE;
-		}
-
-		auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-i"; });
-		if (in_file == opts.end())
-		{
-			cout << "入力ファイル名を指定してください。" << endl;
-			return EXIT_FAILURE;
-		}
-
-		auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-o"; });
-		if (out_file == opts.end())
-		{
-			cout << "出力ファイル名を指定してください。" << endl;
-			return EXIT_FAILURE;
-		}
-
-		cout << "input: " << in_file->second.data() << endl;
-		cout << "output: " << out_file->second.data() << endl;
-
-		if (!ragii::text::ends_with(in_file->second.data(), ".bmp"))
-		{
-			cout << ".bmp 以外は非対応です。" << endl;
-			return EXIT_FAILURE;
-		}
-
-		auto bmp = Bitmap::loadFromFile(in_file->second.data());
-
-		if (!bmp)
-		{
-			cout << "ファイルのロードに失敗しました。" << endl;
-			return 0;
-		}
-
-		if (opts[0].first == "negative")
-		{
-			BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
-			bmp->save(out_file->second.data());
-		}
-		else if (opts[0].first == "binary")
-		{
-			BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
-			bmp->save(out_file->second.data());
-		}
-		else if (opts[0].first == "grayscale")
-		{
-			BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
-			bmp->save(out_file->second.data());
-		}
-		else if (opts[0].first == "laplacian")
-		{
-			BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
-			bmp->save(out_file->second.data());
-		}
+		return convert(opts);
 	}
+
+	return EXIT_SUCCESS;
+}
+
+
+int convert(vector<pair<string_view, string_view>>& opts)
+{
+	if (opts.empty())
+	{
+		cout << "変換方法を指定してください。 negative, grayscale, etc." << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-i"; });
+	if (in_file == opts.end())
+	{
+		cout << "入力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-o"; });
+	if (out_file == opts.end())
+	{
+		cout << "出力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	if (!ragii::text::ends_with(in_file->second.data(), ".bmp"))
+	{
+		cout << ".bmp 以外は非対応です。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto bmp = Bitmap::loadFromFile(in_file->second.data());
+
+	if (!bmp)
+	{
+		cout << "ファイルのロードに失敗しました。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto filter = opts[0].first;
+
+	if (filter == "negative")
+	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
+	}
+	else if (filter == "binary")
+	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
+	}
+	else if (filter == "grayscale")
+	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
+	}
+	else if (filter == "laplacian")
+	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
+	}
+
+	bmp->save(out_file->second.data());
 
 	return EXIT_SUCCESS;
 }
