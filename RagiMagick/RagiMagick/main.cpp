@@ -4,6 +4,7 @@
 #include <iostream>
 #include "ragii/image/Bitmap.h"
 #include "ragii/image/BitmapConverter.h"
+#include "ragii/text/text.h"
 
 
 using namespace std;
@@ -71,6 +72,12 @@ int main(int argc, char* argv[])
 
 		cout << "input: " << in_file->second.data() << endl;
 		cout << "output: " << out_file->second.data() << endl;
+
+		if (!ragii::text::ends_with(in_file->second.data(), ".bmp"))
+		{
+			cout << ".bmp 以外は非対応です。" << endl;
+			return EXIT_FAILURE;
+		}
 
 		if (opts[0].first == "negative")
 		{
