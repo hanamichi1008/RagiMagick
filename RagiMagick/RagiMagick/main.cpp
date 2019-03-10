@@ -92,6 +92,11 @@ int main(int argc, char* argv[])
 			BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
 			bmp->save(out_file->second.data());
 		}
+		else if (opts[0].first == "binary")
+		{
+			BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
+			bmp->save(out_file->second.data());
+		}
 		else if (opts[0].first == "grayscale")
 		{
 			BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);

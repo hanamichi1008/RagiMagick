@@ -17,5 +17,4 @@ void NegativeFilter::apply()
 		*(img + i + 1) = 0xff - *(img + i + 1);
 		*(img + i + 2) = 0xff - *(img + i + 2);
 	}
-
 }

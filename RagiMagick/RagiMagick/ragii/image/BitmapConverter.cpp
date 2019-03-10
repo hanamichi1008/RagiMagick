@@ -1,6 +1,7 @@
 ﻿#include "BitmapConverter.h"
 #include "Bitmap.h"
 #include "filters/IImageFilter.h"
+#include "filters/BinaryFilter.h"
 #include "filters/GrayscaleFilter.h"
 #include "filters/NegativeFilter.h"
 #include "filters/LaplacianFilter.h"
@@ -22,6 +23,9 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 
 	switch (type)
 	{
+	case FilterType::Binary:
+		filter = make_unique<BinaryFilter>();
+		break;
 	case FilterType::Grayscale:
 		filter = make_unique<GrayscaleFilter>();
 		break;
