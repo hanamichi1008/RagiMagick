@@ -3,6 +3,8 @@
 #include "Bitmap.h"
 
 
+using namespace ragii::image;
+
 using namespace std;
 
 

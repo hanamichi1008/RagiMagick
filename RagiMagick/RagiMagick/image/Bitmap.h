@@ -4,6 +4,10 @@
 #include <string>
 #include "types.h"
 
+
+namespace ragii { namespace image {
+
+
 class Bitmap
 {
 public:
@@ -26,3 +30,5 @@ private:
 	std::unique_ptr<uint8_t[]> m_Data;
 };
 
+
+} }

@@ -4,9 +4,10 @@
 #include <iostream>
 #include "image/Bitmap.h"
 #include "image/BitmapConverter.h"
-#include "image/filters/GrayscaleFilter.h"
+
 
 using namespace std;
+using namespace ragii::image;
 
 
 int main(int argc, char* argv[])
@@ -81,12 +82,8 @@ int main(int argc, char* argv[])
 				return 0;
 			}
 
-			//BitmapConverter::negative(bmp.get(), bmp.get());
-			//bmp->save(out_file->second.data());
-
-			auto nega = Bitmap::create(bmp->getWidth(), bmp->getHeight(), bmp->getBitCount());
-			BitmapConverter::negative(bmp.get(), nega.get());
-			nega->save(out_file->second.data());
+			BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
+			bmp->save(out_file->second.data());
 		}
 		else if (opts[0].first == "grayscale")
 		{
@@ -98,13 +95,7 @@ int main(int argc, char* argv[])
 				return 0;
 			}
 
-			ragii::image::FilterParams params;
-			params.width = bmp->getWidth();
-			params.height = bmp->getHeight();
-			params.image = bmp->getData().get();
-			ragii::image::GrayscaleFilter gs;
-			gs.setFilterParams(params);
-			gs.apply();
+			BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
 			bmp->save(out_file->second.data());
 		}
 	}

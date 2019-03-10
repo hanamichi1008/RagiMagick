@@ -1,29 +1,37 @@
 ﻿#include "BitmapConverter.h"
 #include "Bitmap.h"
+#include "filters/IImageFilter.h"
+#include "filters/GrayscaleFilter.h"
+#include "filters/NegativeFilter.h"
 
 
-void BitmapConverter::negative(const Bitmap* src, Bitmap* dst)
+using namespace ragii::image;
+
+using namespace std;
+
+
+void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 {
-	auto src_data = src->getData().get();
-	auto dst_data = dst->getData().get();
+	FilterParams params;
+	params.width = bmp->getWidth();
+	params.height = bmp->getHeight();
+	params.image = bmp->getData().get();
 
-	int w = src->getWidth();
-	int h = src->getHeight();
-	int d = src->getBitCount() / 8;
+	unique_ptr<IImageFilter> filter;
 
-	for (int i = 0; i < w * h * d; i += d)
+	switch (type)
 	{
-		if (d != 3)
-		{
-			continue;
-		}
+	case FilterType::Grayscale:
+		filter = make_unique<GrayscaleFilter>();
+		break;
+	case FilterType::Negative:
+		filter = make_unique<NegativeFilter>();
+		break;
+	}
 
-		uint8_t r = 0xff - *(src_data + i + 0);
-		uint8_t g = 0xff - *(src_data + i + 1);
-		uint8_t b = 0xff - *(src_data + i + 2);
-
-		*(dst_data + i + 0) = r;
-		*(dst_data + i + 1) = g;
-		*(dst_data + i + 2) = b;
+	if (filter)
+	{
+		filter->setFilterParams(params);
+		filter->apply();
 	}
 }

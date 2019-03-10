@@ -1,9 +1,16 @@
 ﻿#pragma once
 
-class Bitmap;
+#include "filters/types.h"
 
-class BitmapConverter
-{
-public:
-	static void negative(const Bitmap* src, Bitmap* dst);
-};
+namespace ragii { namespace image {
+
+	class Bitmap;
+
+	// TODO: このクラスはあとで捨てる
+	class BitmapConverter
+	{
+	public:
+		static void applyFilter(Bitmap* bmp, FilterType type);
+	};
+
+} }
