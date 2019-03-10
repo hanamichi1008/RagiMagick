@@ -177,11 +177,14 @@
   <ItemGroup>
     <ClInclude Include="image\Bitmap.h" />
     <ClInclude Include="image\BitmapConverter.h" />
+    <ClInclude Include="image\filters\GrayscaleFilter.h" />
+    <ClInclude Include="image\filters\IImageFilter.h" />
     <ClInclude Include="image\types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image\Bitmap.cpp" />
     <ClCompile Include="image\BitmapConverter.cpp" />
+    <ClCompile Include="image\filters\GrayscaleFilter.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
