@@ -175,19 +175,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="image\Bitmap.h" />
-    <ClInclude Include="image\BitmapConverter.h" />
-    <ClInclude Include="image\filters\GrayscaleFilter.h" />
-    <ClInclude Include="image\filters\IImageFilter.h" />
-    <ClInclude Include="image\filters\NegativeFilter.h" />
-    <ClInclude Include="image\filters\types.h" />
-    <ClInclude Include="image\types.h" />
+    <ClInclude Include="ragii\image\Bitmap.h" />
+    <ClInclude Include="ragii\image\BitmapConverter.h" />
+    <ClInclude Include="ragii\image\filters\GrayscaleFilter.h" />
+    <ClInclude Include="ragii\image\filters\IImageFilter.h" />
+    <ClInclude Include="ragii\image\filters\NegativeFilter.h" />
+    <ClInclude Include="ragii\image\filters\types.h" />
+    <ClInclude Include="ragii\image\types.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="image\Bitmap.cpp" />
-    <ClCompile Include="image\BitmapConverter.cpp" />
-    <ClCompile Include="image\filters\GrayscaleFilter.cpp" />
-    <ClCompile Include="image\filters\NegativeFilter.cpp" />
+    <ClCompile Include="ragii\image\Bitmap.cpp" />
+    <ClCompile Include="ragii\image\BitmapConverter.cpp" />
+    <ClCompile Include="ragii\image\filters\GrayscaleFilter.cpp" />
+    <ClCompile Include="ragii\image\filters\NegativeFilter.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

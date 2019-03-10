@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include "image/Bitmap.h"
-#include "image/BitmapConverter.h"
+#include "ragii/image/Bitmap.h"
+#include "ragii/image/BitmapConverter.h"
 
 
 using namespace std;
