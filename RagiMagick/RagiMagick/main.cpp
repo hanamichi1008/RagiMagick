@@ -79,30 +79,27 @@ int main(int argc, char* argv[])
 			return EXIT_FAILURE;
 		}
 
+		auto bmp = Bitmap::loadFromFile(in_file->second.data());
+
+		if (!bmp)
+		{
+			cout << "ファイルのロードに失敗しました。" << endl;
+			return 0;
+		}
+
 		if (opts[0].first == "negative")
 		{
-			auto bmp = Bitmap::loadFromFile(in_file->second.data());
-
-			if (!bmp)
-			{
-				cout << "ファイルのロードに失敗しました。" << endl;
-				return 0;
-			}
-
 			BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
 			bmp->save(out_file->second.data());
 		}
 		else if (opts[0].first == "grayscale")
 		{
-			auto bmp = Bitmap::loadFromFile(in_file->second.data());
-
-			if (!bmp)
-			{
-				cout << "ファイルのロードに失敗しました。" << endl;
-				return 0;
-			}
-
 			BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
+			bmp->save(out_file->second.data());
+		}
+		else if (opts[0].first == "laplacian")
+		{
+			BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
 			bmp->save(out_file->second.data());
 		}
 	}

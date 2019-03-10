@@ -179,6 +179,7 @@
     <ClInclude Include="ragii\image\BitmapConverter.h" />
     <ClInclude Include="ragii\image\filters\GrayscaleFilter.h" />
     <ClInclude Include="ragii\image\filters\IImageFilter.h" />
+    <ClInclude Include="ragii\image\filters\LaplacianFilter.h" />
     <ClInclude Include="ragii\image\filters\NegativeFilter.h" />
     <ClInclude Include="ragii\image\filters\types.h" />
     <ClInclude Include="ragii\image\types.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="ragii\image\Bitmap.cpp" />
     <ClCompile Include="ragii\image\BitmapConverter.cpp" />
     <ClCompile Include="ragii\image\filters\GrayscaleFilter.cpp" />
+    <ClCompile Include="ragii\image\filters\LaplacianFilter.cpp" />
     <ClCompile Include="ragii\image\filters\NegativeFilter.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>

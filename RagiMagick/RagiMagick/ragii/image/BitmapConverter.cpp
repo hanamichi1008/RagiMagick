@@ -3,6 +3,7 @@
 #include "filters/IImageFilter.h"
 #include "filters/GrayscaleFilter.h"
 #include "filters/NegativeFilter.h"
+#include "filters/LaplacianFilter.h"
 
 
 using namespace ragii::image;
@@ -26,6 +27,9 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 		break;
 	case FilterType::Negative:
 		filter = make_unique<NegativeFilter>();
+		break;
+	case FilterType::Laplacian:
+		filter = make_unique<LaplacianFilter>();
 		break;
 	}
 
