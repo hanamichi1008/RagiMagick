@@ -38,47 +38,65 @@ int main(int argc, char* argv[])
 		cout << i.first.data() << ": " << i.second.data() << endl;
 	}
 
-	if (!opts.empty() && opts[0].first == "convert")
+	if (opts.empty())
+	{
+		cout << "コマンドを指定してください。 convert, etc." << endl;
+		return EXIT_FAILURE;
+	}
+
+	if (opts[0].first == "convert")
 	{
 		opts.erase(opts.begin());
-		if (!opts.empty() && opts[0].first == "negate")
+
+		if (opts.empty())
 		{
-			opts.erase(opts.begin());
+			cout << "変換方法を指定してください。 negative, grayscale, etc." << endl;
+			return EXIT_FAILURE;
+		}
 
-			auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-i"; });
-			if (in_file == opts.end())
-			{
-				cout << "not specified: -i" << endl;
-				return EXIT_FAILURE;
-			}
+		auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-i"; });
+		if (in_file == opts.end())
+		{
+			cout << "入力ファイル名を指定してください。" << endl;
+			return EXIT_FAILURE;
+		}
 
-			auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-o"; });
-			if (out_file == opts.end())
-			{
-				cout << "not specified: -o" << endl;
-				return EXIT_FAILURE;
-			}
+		auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-o"; });
+		if (out_file == opts.end())
+		{
+			cout << "出力ファイル名を指定してください。" << endl;
+			return EXIT_FAILURE;
+		}
 
-			cout << "input: " << in_file->second.data() << endl;
-			cout << "output: " << out_file->second.data() << endl;
+		cout << "input: " << in_file->second.data() << endl;
+		cout << "output: " << out_file->second.data() << endl;
 
+		if (opts[0].first == "negative")
+		{
 			auto bmp = Bitmap::loadFromFile(in_file->second.data());
 
 			if (!bmp)
 			{
-				cout << "bitmap file load failed." << endl;
+				cout << "ファイルのロードに失敗しました。" << endl;
 				return 0;
 			}
-
-			cout << (char)(bmp->getHeader().file.bfType & 0x00ff) << endl;
-			cout << (char)(bmp->getHeader().file.bfType >> 8) << endl;
 
 			//BitmapConverter::negative(bmp.get(), bmp.get());
 			//bmp->save(out_file->second.data());
 
-			//auto nega = Bitmap::create(bmp->getWidth(), bmp->getHeight(), bmp->getBitCount());
-			//BitmapConverter::negative(bmp.get(), nega.get());
-			//nega->save(out_file->second.data());
+			auto nega = Bitmap::create(bmp->getWidth(), bmp->getHeight(), bmp->getBitCount());
+			BitmapConverter::negative(bmp.get(), nega.get());
+			nega->save(out_file->second.data());
+		}
+		else if (opts[0].first == "grayscale")
+		{
+			auto bmp = Bitmap::loadFromFile(in_file->second.data());
+
+			if (!bmp)
+			{
+				cout << "ファイルのロードに失敗しました。" << endl;
+				return 0;
+			}
 
 			ragii::image::FilterParams params;
 			params.width = bmp->getWidth();
