@@ -6,24 +6,27 @@
 using namespace ragii::image;
 
 
-static std::tuple<uint8_t, uint8_t, uint8_t> getPixels(uint8_t* img, int width, int row, int col)
-{
-	return
-		std::make_tuple(
-			*(img + (row * width + col + 0)),
-			*(img + (row * width + col + 1)),
-			*(img + (row * width + col + 2))
-		);
+namespace {
+
+	std::tuple<uint8_t, uint8_t, uint8_t> getPixels(uint8_t* img, int width, int depth, int row, int col)
+	{
+		return
+			std::make_tuple(
+				*(img + (row * width * depth + col + 0)),
+				*(img + (row * width * depth + col + 1)),
+				*(img + (row * width * depth + col + 2))
+			);
+	}
+
+	void setPixels(uint8_t* img, int width, int depth, int row, int col, std::tuple<uint8_t, uint8_t, uint8_t> pixels)
+	{
+		*(img + (row * width * depth + col + 0)) = std::get<0>(pixels);
+		*(img + (row * width * depth + col + 1)) = std::get<1>(pixels);
+		*(img + (row * width * depth + col + 2)) = std::get<2>(pixels);
+	}
+
 }
 
-static void setPixels(uint8_t* img, int width, int row, int col, std::tuple<uint8_t, uint8_t, uint8_t> pixels)
-{
-	*(img + (row * width + col + 0)) = std::get<0>(pixels);
-	*(img + (row * width + col + 1)) = std::get<1>(pixels);
-	*(img + (row * width + col + 2)) = std::get<2>(pixels);
-}
-
-// TODO: 過去に勢いで実装したせいで、何やってるかわからん。見直す。
 void LaplacianFilter::apply()
 {
 	int w = m_Params.width;
@@ -64,7 +67,7 @@ void LaplacianFilter::apply()
 
 			for (i = 0; i < 9; i++)
 			{
-				auto rgb = getPixels(img, w, row + rowOffsets[i], col + colOffsets[i]);
+				auto rgb = getPixels(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
 				result += (std::get<0>(rgb) * coef[i] + std::get<1>(rgb) * coef[i] + std::get<2>(rgb) * coef[i]);
 			}
 
@@ -78,7 +81,7 @@ void LaplacianFilter::apply()
 				result = 0xff;
 			}
 
-			setPixels(img, w, row, col, std::make_tuple(result, result, result));
+			setPixels(img, w, d, row, col, std::make_tuple(result, result, result));
 
 		}
 	}
