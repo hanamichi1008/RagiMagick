@@ -11,7 +11,7 @@ void BinaryFilter::apply()
 	int d = 24 / 8; // TODO:
 	uint8_t* img = m_Params.image;
 
-	const int threashold = 0xaa;
+	const int threshold = 0xaa;
 	uint8_t r, g, b, result;
 
 	for (int i = 0; i < w * h * d; i += d)
@@ -20,7 +20,7 @@ void BinaryFilter::apply()
 		g = *(img + i + 1);
 		b = *(img + i + 2);
 		
-		if (r > threashold || g > threashold || b > threashold)
+		if (r > threshold || g > threshold || b > threshold)
 		{
 			result = 0x00;
 		}
