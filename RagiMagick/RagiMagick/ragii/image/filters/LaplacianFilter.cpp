@@ -1,75 +1,87 @@
 ﻿#include "LaplacianFilter.h"
 
 #include <memory>
+#include <tuple>
 
 using namespace ragii::image;
+
+
+static std::tuple<uint8_t, uint8_t, uint8_t> getPixels(uint8_t* img, int width, int row, int col)
+{
+	return
+		std::make_tuple(
+			*(img + (row * width + col + 0)),
+			*(img + (row * width + col + 1)),
+			*(img + (row * width + col + 2))
+		);
+}
+
+static void setPixels(uint8_t* img, int width, int row, int col, std::tuple<uint8_t, uint8_t, uint8_t> pixels)
+{
+	*(img + (row * width + col + 0)) = std::get<0>(pixels);
+	*(img + (row * width + col + 1)) = std::get<1>(pixels);
+	*(img + (row * width + col + 2)) = std::get<2>(pixels);
+}
 
 // TODO: 過去に勢いで実装したせいで、何やってるかわからん。見直す。
 void LaplacianFilter::apply()
 {
 	int w = m_Params.width;
 	int h = m_Params.height;
-	int depth = 24 / 8; // TODO:
+	int d = 24 / 8; // TODO:
 	uint8_t* img = m_Params.image;
 
-	// kernel operator
-	int kop[] =
+	int coef[] =
 	{
 		-1, -1, -1,
 		-1,  8, -1,
 		-1, -1, -1
 	};
 
-	uint8_t** src_img = new uint8_t*[h];
-	for (int row = 0; row < h; row++)
+	int rowOffsets[] =
 	{
-		src_img[row] = &img[w * row * depth];
-	}
+		-1, -1, -1,
+		 0,  0,  0,
+		 1,  1,  1
+	};
 
-	uint8_t* edge_img = new uint8_t[w * h * depth];
-	int d[9];
-	int row, col, px;
-	int xx;
-	int amp = 10;
-	int left, center, right;
-	left = center = right = 0;
+	int colOffsets[] = 
+	{
+		-3,  0,  3,
+		-3,  0,  3,
+		-3,  0,  3
+	};
+
+	int row, col;
+	int result = 0;
+	int i;
 
 	for (row = 1; row < h - 1; row++)
 	{
-		for (col = 1; col < w * depth - 1; col++)
+		for (col = d; col < w * d - d; col += d)
 		{
-			d[0] = src_img[row - 1][col - 1];
-			d[1] = src_img[row - 1][col + 0];
-			d[2] = src_img[row - 1][col + 1];
-			d[3] = src_img[row + 0][col - 1];
-			d[4] = src_img[row + 0][col + 0];
-			d[5] = src_img[row + 0][col + 1];
-			d[6] = src_img[row + 1][col - 1];
-			d[7] = src_img[row + 1][col + 0];
-			d[8] = src_img[row + 1][col + 1];
-			xx =
-				kop[0] * d[0] + kop[1] * d[1] + kop[2] * d[2] +
-				kop[3] * d[3] + kop[4] * d[4] + kop[5] * d[5] +
-				kop[6] * d[6] + kop[7] * d[7] + kop[8] * d[8];
-			px = xx * amp;
-			if (px < 0)
+			result = 0;
+
+			for (i = 0; i < 9; i++)
 			{
-				px = -px;
+				auto rgb = getPixels(img, w, row + rowOffsets[i], col + colOffsets[i]);
+				result += (std::get<0>(rgb) * coef[i] + std::get<1>(rgb) * coef[i] + std::get<2>(rgb) * coef[i]);
 			}
-			if (px > 255)
+
+			if (result < 0)
 			{
-				px = 255;
+				result = 0;
 			}
-			*(edge_img + (row * w * depth + col + 0)) = px;
-			*(edge_img + (row * w * depth + col + 1)) = px;
-			*(edge_img + (row * w * depth + col + 2)) = px;
+
+			if (result > 0xff)
+			{
+				result = 0xff;
+			}
+
+			setPixels(img, w, row, col, std::make_tuple(result, result, result));
+
 		}
 	}
 
-	memmove(img, edge_img, w * h * depth);
-	delete[] edge_img;
-	edge_img = nullptr;
 
-	delete[] src_img;
-	src_img = nullptr;
 }
