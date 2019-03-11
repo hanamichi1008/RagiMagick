@@ -1,10 +1,11 @@
-﻿
+﻿#include "Bitmap.h"
+
 #include <fstream>
-#include "Bitmap.h"
+#include "formats/bitmap/BitmapFileHeader.h"
+#include "formats/bitmap/BitmapInfoHeader.h"
 
 
 using namespace ragii::image;
-
 using namespace std;
 
 
@@ -19,7 +20,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
 	auto fileSize = fs.seekg(0, ios::end).tellg();
 
-	if (sizeof(BITMAPFILEHEADER) > fileSize)
+	if (BitmapFileHeaderSize > fileSize)
 	{
 		return nullptr;
 	}
@@ -27,46 +28,35 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 	auto bmp = make_unique<Bitmap>();
 
 	fs.seekg(0, ios::beg);
-	fs.read(reinterpret_cast<char*>(&bmp->m_Header.file), sizeof(BITMAPFILEHEADER));
+	fs.read(reinterpret_cast<char*>(&bmp->m_Header.File), BitmapFileHeaderSize);
 
-	auto remain = fileSize - static_cast<streampos>(sizeof(BITMAPFILEHEADER));
+	auto remain = fileSize - static_cast<streampos>(BitmapFileHeaderSize);
 
-	if (sizeof(BITMAPINFOHEADER) > remain)
+	if (BitmapInfoHeaderSize > remain)
 	{
 		return bmp;
 	}
 
-	uint64_t infoSize = 0UL;
-	fs.read(reinterpret_cast<char*>(&infoSize), sizeof(DWORD));
-	fs.seekg(-streamoff(sizeof(DWORD)), ios::cur);
+	uint32_t infoSize = 0UL;
+	fs.read(reinterpret_cast<char*>(&infoSize), sizeof(uint32_t));
+	fs.seekg(-streamoff(sizeof(uint32_t)), ios::cur);
 
-	if (infoSize == sizeof(BITMAPINFOHEADER))
+	if (infoSize == BitmapInfoHeaderSize)
 	{
-		fs.read(reinterpret_cast<char*>(&bmp->m_Header.info), sizeof(BITMAPINFOHEADER));
-		bmp->m_Header.version = BitmapVersion::V1;
-	}
-	else if (infoSize == sizeof(BITMAPV4HEADER))
-	{
-		fs.read(reinterpret_cast<char*>(&bmp->m_Header.info), sizeof(BITMAPV4HEADER));
-		bmp->m_Header.version = BitmapVersion::V4;
-	}
-	else if (infoSize == sizeof(BITMAPV5HEADER))
-	{
-		fs.read(reinterpret_cast<char*>(&bmp->m_Header.info), sizeof(BITMAPV5HEADER));
-		bmp->m_Header.version = BitmapVersion::V5;
+		fs.read(reinterpret_cast<char*>(&bmp->m_Header.Info), BitmapInfoHeaderSize);
 	}
 
 	remain -= infoSize;
 
-	fs.seekg(streamoff(bmp->m_Header.file.bfOffBits), ios::beg);
+	fs.seekg(streamoff(bmp->m_Header.File.OffBits), ios::beg);
 	if (fs.bad())
 	{
 		return bmp;
 	}
 
-	bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.info.v1.biSizeImage);
+	bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.Info.SizeImage);
 
-	fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), bmp->m_Header.info.v1.biSizeImage);
+	fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), bmp->m_Header.Info.SizeImage);
 
 	fs.close();
 
@@ -77,21 +67,24 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
 {
 	auto bmp = make_unique<Bitmap>();
 
-	bmp->m_Header.file = {};
-	bmp->m_Header.file.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + width * height * bitCount / 8;
-	bmp->m_Header.file.bfType = 'B' | ('M' << 8);
-	bmp->m_Header.file.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	BitmapFileHeader file = {};
+	file = {};
+	file.Size = BitmapHeaderSize + width * height * bitCount / 8;
+	file.Type = 'B' | ('M' << 8);
+	file.OffBits = BitmapHeaderSize;
+	memcpy(&bmp->m_Header.File, &file, BitmapFileHeaderSize);
 
-	bmp->m_Header.info = {};
-	bmp->m_Header.info.v1.biSize = sizeof(BITMAPINFOHEADER);
-	bmp->m_Header.info.v1.biBitCount = bitCount;
-	bmp->m_Header.info.v1.biWidth = width;
-	bmp->m_Header.info.v1.biHeight = height;
-	bmp->m_Header.info.v1.biPlanes = 1;
-	bmp->m_Header.info.v1.biCompression = BI_RGB;
-	bmp->m_Header.info.v1.biSizeImage = width * height * bitCount / 8;
+	BitmapInfoHeader info = {};
+	info.Size = BitmapInfoHeaderSize;
+	info.BitCount = bitCount;
+	info.Width = width;
+	info.Height = height;
+	info.Planes = 1;
+	info.Compression = BI_RGB;
+	info.SizeImage = width * height * bitCount / 8;
+	memcpy(&bmp->m_Header.Info, &info, BitmapInfoHeaderSize);
 
-	bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.info.v1.biSizeImage);
+	bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.Info.SizeImage);
 
 	return bmp;
 }
@@ -99,9 +92,9 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
 void Bitmap::save(string path)
 {
 	ofstream fs(path, ios::out | ios::binary);
-	fs.write(reinterpret_cast<char*>(&m_Header.file), sizeof(m_Header.file));
-	fs.write(reinterpret_cast<char*>(&m_Header.info), m_Header.getInfoSize());
-	fs.write(reinterpret_cast<char*>(m_Data.get()), m_Header.info.v1.biSizeImage);
+	fs.write(reinterpret_cast<char*>(&m_Header.File), BitmapFileHeaderSize);
+	fs.write(reinterpret_cast<char*>(&m_Header.Info), BitmapInfoHeaderSize);
+	fs.write(reinterpret_cast<char*>(m_Data.get()), m_Header.Info.SizeImage);
 	fs.flush();
 	fs.close();
 }
@@ -123,16 +116,16 @@ const unique_ptr<uint8_t[]>& Bitmap::getData() const
 
 int32_t Bitmap::getWidth() const
 {
-	return m_Header.info.v1.biWidth;
+	return m_Header.Info.Width;
 }
 
 int32_t Bitmap::getHeight() const
 {
-	return m_Header.info.v1.biHeight;
+	return m_Header.Info.Height;
 }
 
 int16_t Bitmap::getBitCount() const
 {
-	return m_Header.info.v1.biBitCount;
+	return m_Header.Info.BitCount;
 }
 

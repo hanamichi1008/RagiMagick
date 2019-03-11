@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include "types.h"
+#include "formats/bitmap/BitmapHeader.h"
 
 
 namespace ragii { namespace image {

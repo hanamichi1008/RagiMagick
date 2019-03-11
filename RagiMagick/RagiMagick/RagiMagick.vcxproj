@@ -183,7 +183,9 @@
     <ClInclude Include="ragii\image\filters\LaplacianFilter.h" />
     <ClInclude Include="ragii\image\filters\NegativeFilter.h" />
     <ClInclude Include="ragii\image\filters\types.h" />
-    <ClInclude Include="ragii\image\types.h" />
+    <ClInclude Include="ragii\image\formats\bitmap\BitmapFileHeader.h" />
+    <ClInclude Include="ragii\image\formats\bitmap\BitmapHeader.h" />
+    <ClInclude Include="ragii\image\formats\bitmap\BitmapInfoHeader.h" />
     <ClInclude Include="ragii\text\text.h" />
     <ClInclude Include="ragii\type\type_traits.h" />
   </ItemGroup>
