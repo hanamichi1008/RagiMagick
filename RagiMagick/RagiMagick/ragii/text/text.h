@@ -43,7 +43,7 @@ namespace ragii { namespace text {
 	>
 	constexpr bool is_letter(C c)
 	{
-		return is_lower_letter(C) || is_upper_letter(C);
+		return is_lower_letter(c) || is_upper_letter(c);
 	}
 
 	// 英小文字化
