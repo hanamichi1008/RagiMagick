@@ -1,28 +1,35 @@
 ﻿#include "LaplacianFilter.h"
 
 #include <memory>
-#include <tuple>
 
 using namespace ragii::image;
 
 
 namespace {
 
-	std::tuple<uint8_t, uint8_t, uint8_t> getPixels(uint8_t* img, int width, int depth, int row, int col)
+	// TODO: move対応
+	struct Color
+	{
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+	};
+
+	Color getColor(uint8_t* img, int width, int depth, int row, int col)
 	{
 		return
-			std::make_tuple(
+			Color {
 				*(img + (row * width * depth + col + 0)),
 				*(img + (row * width * depth + col + 1)),
 				*(img + (row * width * depth + col + 2))
-			);
+			};
 	}
 
-	void setPixels(uint8_t* img, int width, int depth, int row, int col, std::tuple<uint8_t, uint8_t, uint8_t> pixels)
+	void setPixels(uint8_t* img, int width, int depth, int row, int col, uint8_t color)
 	{
-		*(img + (row * width * depth + col + 0)) = std::get<0>(pixels);
-		*(img + (row * width * depth + col + 1)) = std::get<1>(pixels);
-		*(img + (row * width * depth + col + 2)) = std::get<2>(pixels);
+		*(img + (row * width * depth + col + 0)) = color;
+		*(img + (row * width * depth + col + 1)) = color;
+		*(img + (row * width * depth + col + 2)) = color;
 	}
 
 }
@@ -55,9 +62,10 @@ void LaplacianFilter::apply()
 		-3,  0,  3
 	};
 
-	int row, col;
+	int row, col = 0;
 	int result = 0;
-	int i;
+	int i = 0;
+	Color color = {};
 
 	for (row = 1; row < h - 1; row++)
 	{
@@ -67,8 +75,8 @@ void LaplacianFilter::apply()
 
 			for (i = 0; i < 9; i++)
 			{
-				auto rgb = getPixels(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
-				result += (std::get<0>(rgb) * coef[i] + std::get<1>(rgb) * coef[i] + std::get<2>(rgb) * coef[i]);
+				color = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
+				result += (color.r * coef[i] + color.g * coef[i] + color.b * coef[i]);
 			}
 
 			if (result < 0)
@@ -81,7 +89,7 @@ void LaplacianFilter::apply()
 				result = 0xff;
 			}
 
-			setPixels(img, w, d, row, col, std::make_tuple(result, result, result));
+			setPixels(img, w, d, row, col, static_cast<uint8_t>(result));
 
 		}
 	}
