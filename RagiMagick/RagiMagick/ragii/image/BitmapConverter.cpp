@@ -17,6 +17,7 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 	FilterParams params;
 	params.width = bmp->getWidth();
 	params.height = bmp->getHeight();
+	params.bitCount = bmp->getBitCount();
 	params.image = bmp->getData().get();
 
 	unique_ptr<IImageFilter> filter;

@@ -9,6 +9,7 @@ namespace ragii { namespace image {
 	{
 		int width;
 		int height;
+		int bitCount;
 		uint8_t* image;
 	};
 

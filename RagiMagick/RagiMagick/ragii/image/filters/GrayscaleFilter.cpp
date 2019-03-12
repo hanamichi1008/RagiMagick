@@ -6,11 +6,31 @@ void GrayscaleFilter::apply()
 {
 	int w = m_Params.width;
 	int h = m_Params.height;
-	int d = 24 / 8; // TODO:
-	uint8_t *img = m_Params.image;
+	int d = m_Params.bitCount / 8;
+	uint8_t* img = m_Params.image;
 
 	const int pixelCount = w * h * d;
+	int gray = 0;
 
+	for (int i = 0; i < w * h * d; i += d)
+	{
+		gray = 0;
+		gray += *(img + 0) * 77;
+		gray += *(img + 1) * 150;
+		gray += *(img + 2) * 29;
+		gray >>= 8;
+
+		*(img + 0) = static_cast<uint8_t>(gray);
+		*(img + 1) = static_cast<uint8_t>(gray);
+		*(img + 2) = static_cast<uint8_t>(gray);
+
+		img += d;
+	}
+
+	// よくわからないけどクラッシュ
+	// 問題なさそうにみえるけど・・・
+	// ※ i が -4000 とかになってた＆ポインタの移動量が多すぎたので修正したけどだめだった
+	/*
 	int i = pixelCount;
 	while (1)
 	{
@@ -24,14 +44,16 @@ void GrayscaleFilter::apply()
 
 		img[0] = img[1] = img[2] = gray;
 
-		img += sizeof(uint8_t) * d;
+		img += d;
 		i -= d;
-		if (!i)
+		if (i <= 0)
 		{
 			break;
 		}
 	}
+	*/
 
+	// コンパイラ依存なのでコメントアウト(MSVC専用)
 	/**
 	__asm
 	{
