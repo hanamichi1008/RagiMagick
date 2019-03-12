@@ -1,6 +1,7 @@
 ﻿#include "Bitmap.h"
 
 #include <fstream>
+#include <iostream>
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
 
@@ -15,6 +16,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
 	if (!fs)
 	{
+		cout << path << ": open failed." << endl;
 		return nullptr;
 	}
 
@@ -22,6 +24,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
 	if (BitmapFileHeaderSize > fileSize)
 	{
+		cout << "invalid bitmap file header." << endl;
 		return nullptr;
 	}
 
@@ -34,6 +37,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
 	if (BitmapInfoHeaderSize > remain)
 	{
+		cout << "invalid bitmap info header." << endl;
 		return bmp;
 	}
 
@@ -57,7 +61,6 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 	bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.Info.SizeImage);
 
 	fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), bmp->m_Header.Info.SizeImage);
-
 	fs.close();
 
 	return bmp;
