@@ -8,3 +8,10 @@ RagiMagick/RagiMagick/x64/
 
 # file
 *.filters
+
+
+# For Compiling with CMake
+build/
+
+# For MacOS
+.DS_Store
