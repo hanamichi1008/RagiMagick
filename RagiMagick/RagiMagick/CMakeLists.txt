@@ -3,5 +3,5 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(ragii)
-add_executable(Main main.cpp)
-target_link_libraries(Main Image)
+add_executable(RagiMagick main.cpp)
+target_link_libraries(RagiMagick Image)
