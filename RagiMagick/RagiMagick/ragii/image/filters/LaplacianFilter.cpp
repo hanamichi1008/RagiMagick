@@ -25,11 +25,11 @@ namespace {
 			};
 	}
 
-	void setPixels(uint8_t* img, int width, int depth, int row, int col, uint8_t color)
+	void setPixels(uint8_t* img, int width, int depth, int row, int col, const Color& color)
 	{
-		*(img + (row * width * depth + col + 0)) = color;
-		*(img + (row * width * depth + col + 1)) = color;
-		*(img + (row * width * depth + col + 2)) = color;
+		*(img + (row * width * depth + col + 0)) = color.b;
+		*(img + (row * width * depth + col + 1)) = color.g;
+		*(img + (row * width * depth + col + 2)) = color.r;
 	}
 
 }
@@ -63,7 +63,6 @@ void LaplacianFilter::apply()
 	};
 
 	int row, col = 0;
-	int result = 0;
 	int i = 0;
 	Color color = {};
 
@@ -71,26 +70,15 @@ void LaplacianFilter::apply()
 	{
 		for (col = d; col < w * d - d; col += d)
 		{
-			result = 0;
-
 			for (i = 0; i < 9; i++)
 			{
 				color = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
-				result += (color.r * coef[i] + color.g * coef[i] + color.b * coef[i]);
+				color.b *= coef[i];
+				color.g *= coef[i];
+				color.r *= coef[i];
 			}
 
-			if (result < 0)
-			{
-				result = 0;
-			}
-
-			if (result > 0xff)
-			{
-				result = 0xff;
-			}
-
-			setPixels(img, w, d, row, col, static_cast<uint8_t>(result));
-
+			setPixels(img, w, d, row, col, color);
 		}
 	}
 
