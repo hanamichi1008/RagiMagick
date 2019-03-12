@@ -8,7 +8,7 @@ void BinaryFilter::apply()
 {
 	int w = m_Params.width;
 	int h = m_Params.height;
-	int d = 24 / 8; // TODO:
+	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
 
 	const int threshold = 0xaa;

@@ -112,6 +112,7 @@ int convert(vector<pair<string_view, string_view>>& opts)
 	}
 	else if (filter == "laplacian")
 	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
 		BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
 	}
 
