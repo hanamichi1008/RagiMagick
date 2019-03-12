@@ -1,18 +1,38 @@
 ﻿#include "GrayscaleFilter.h"
 
-
 using namespace ragii::image;
-
 
 void GrayscaleFilter::apply()
 {
 	int w = m_Params.width;
 	int h = m_Params.height;
 	int d = 24 / 8; // TODO:
-	uint8_t* img = m_Params.image;
+	uint8_t *img = m_Params.image;
 
 	const int pixelCount = w * h * d;
 
+	int i = pixelCount;
+	while (1)
+	{
+
+		int d = 0;
+		d = img[0] * 77;
+		d += img[1] * 150;
+		d += img[2] * 29;
+
+		uint8_t gray = uint8_t(d >> 8);
+
+		img[0] = img[1] = img[2] = gray;
+
+		img += sizeof(uint8_t) * d;
+		i -= d;
+		if (!i)
+		{
+			break;
+		}
+	}
+
+	/**
 	__asm
 	{
 		mov ebx, img
@@ -43,5 +63,5 @@ void GrayscaleFilter::apply()
 		sub ecx, d
 		jnz loop0
 	}
-
+	**/
 }
