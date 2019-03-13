@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <x86intrin.h>
 #include "NegativeFilter.h"
 
 using namespace std;
@@ -11,17 +12,22 @@ void NegativeFilter::apply()
 	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
 
-	if (d != 3 && d != 4)
+	if (/*d != 3 && */d != 4)
 	{
 		cout << "depth " << d << " not supported." << endl;
 		return;
 	}
 
-	for (int i = 0; i < w * h; i++)
+	uint8_t a[16] = { 0xff };
+
+	__m128i src_a, src_b, dst;
+	src_b = _mm_load_si128(reinterpret_cast<__m128i*>(a));
+
+	for (int i = 0; i < w * h; i += 4)
 	{
-		img[0] = 0xff - img[0];
-		img[1] = 0xff - img[1];
-		img[2] = 0xff - img[2];
-		img += d;
+		src_a = _mm_load_si128(reinterpret_cast<__m128i*>(img));
+		dst = _mm_add_epi16(src_b, -src_a);
+		_mm_store_si128(reinterpret_cast<__m128i*>(img), dst);
+		img += 16;
 	}
 }
