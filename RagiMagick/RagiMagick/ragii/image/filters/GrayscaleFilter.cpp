@@ -1,6 +1,14 @@
-﻿#include "GrayscaleFilter.h"
+﻿#include <iostream>
+#include "GrayscaleFilter.h"
 
+using namespace std;
 using namespace ragii::image;
+
+namespace {
+	constexpr int B_COEF = 0.298912 * 256;
+	constexpr int G_COEF = 0.586611 * 256;
+	constexpr int R_COEF = 0.114478 * 256;
+}
 
 void GrayscaleFilter::apply()
 {
@@ -9,20 +17,24 @@ void GrayscaleFilter::apply()
 	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
 
-	const int pixelCount = w * h * d;
+	if (d != 3 && d != 4) {
+		cout << "depth " << d << " not supported." << endl;
+		return;
+	}
+
 	int gray = 0;
 
 	for (int i = 0; i < w * h * d; i += d)
 	{
 		gray = 0;
-		gray += *(img + 0) * 77;
-		gray += *(img + 1) * 150;
-		gray += *(img + 2) * 29;
+		gray += img[0] * B_COEF;
+		gray += img[1] * G_COEF;
+		gray += img[2] * R_COEF;
 		gray >>= 8;
 
-		*(img + 0) = static_cast<uint8_t>(gray);
-		*(img + 1) = static_cast<uint8_t>(gray);
-		*(img + 2) = static_cast<uint8_t>(gray);
+		img[0] = static_cast<uint8_t>(gray);
+		img[1] = static_cast<uint8_t>(gray);
+		img[2] = static_cast<uint8_t>(gray);
 
 		img += d;
 	}
