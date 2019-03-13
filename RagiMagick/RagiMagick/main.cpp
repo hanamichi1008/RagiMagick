@@ -10,8 +10,13 @@
 using namespace std;
 using namespace ragii::image;
 
+struct CommandOption
+{
+	string_view name;
+	string_view value;
+};
 
-int convert(vector<pair<string_view, string_view>>& opts);
+int convert(vector<CommandOption>& opts);
 
 int main(int argc, char* argv[])
 {
@@ -20,26 +25,26 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	vector<pair<string_view, string_view>> opts;
+	vector<CommandOption> opts;
 
 	for (int i = 1; i < argc; )
 	{
 		auto opt = string_view(argv[i]);
 		if (opt[0] == '-')
 		{
-			opts.emplace_back(argv[i], argv[i + 1]);
+			opts.emplace_back(CommandOption { argv[i], argv[i + 1] });
 			i += 2;
 		}
 		else
 		{
-			opts.emplace_back(argv[i], "");
+			opts.emplace_back(CommandOption { argv[i], "" });
 			i++;
 		}
 	}
 
 	for (auto i : opts)
 	{
-		cout << i.first.data() << ": " << i.second.data() << endl;
+		cout << i.name.data() << ": " << i.value.data() << endl;
 	}
 
 	if (opts.empty())
@@ -48,7 +53,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	auto command = opts[0].first;
+	auto command = opts[0].name;
 	opts.erase(opts.begin());
 
 	if (command == "convert")
@@ -60,7 +65,7 @@ int main(int argc, char* argv[])
 }
 
 
-int convert(vector<pair<string_view, string_view>>& opts)
+int convert(vector<CommandOption>& opts)
 {
 	if (opts.empty())
 	{
@@ -68,27 +73,27 @@ int convert(vector<pair<string_view, string_view>>& opts)
 		return EXIT_FAILURE;
 	}
 
-	auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-i"; });
+	auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-i"; });
 	if (in_file == opts.end())
 	{
 		cout << "入力ファイル名を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
 
-	auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.first == "-o"; });
+	auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
 	if (out_file == opts.end())
 	{
 		cout << "出力ファイル名を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
 
-	if (!ragii::text::ends_with(in_file->second.data(), ".bmp"))
+	if (!ragii::text::ends_with(in_file->value.data(), ".bmp"))
 	{
 		cout << ".bmp 以外は非対応です。" << endl;
 		return EXIT_FAILURE;
 	}
 
-	auto bmp = Bitmap::loadFromFile(in_file->second.data());
+	auto bmp = Bitmap::loadFromFile(in_file->value.data());
 
 	if (!bmp)
 	{
@@ -96,7 +101,7 @@ int convert(vector<pair<string_view, string_view>>& opts)
 		return EXIT_FAILURE;
 	}
 
-	auto filter = opts[0].first;
+	auto filter = opts[0].name;
 
 	if (filter == "negative")
 	{
@@ -116,7 +121,8 @@ int convert(vector<pair<string_view, string_view>>& opts)
 		BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
 	}
 
-	bmp->save(out_file->second.data());
+	bmp->save(out_file->value.data());
+	cout << "converted." << endl;
 
 	return EXIT_SUCCESS;
 }
