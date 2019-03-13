@@ -1,14 +1,13 @@
-﻿#include "LaplacianFilter.h"
-
-#include <memory>
+﻿#include <memory>
 #include <algorithm>
+#include <iostream>
+#include "LaplacianFilter.h"
 
+using namespace std;
 using namespace ragii::image;
-
 
 namespace {
 
-	// TODO: move対応
 	struct Color
 	{
 		int b;
@@ -26,7 +25,7 @@ namespace {
 			};
 	}
 
-	void setPixels(uint8_t* img, int width, int depth, int row, int col, const Color& color)
+	void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
 	{
 		*(img + (row * width * depth + col + 0)) = color.b;
 		*(img + (row * width * depth + col + 1)) = color.g;
@@ -41,6 +40,11 @@ void LaplacianFilter::apply()
 	int h = m_Params.height;
 	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
+
+	if (d != 3 && d != 4) {
+		cout << "depth " << d << " not supported." << endl;
+		return;
+	}
 
 	int coef[] =
 	{
@@ -84,7 +88,7 @@ void LaplacianFilter::apply()
 
 			for (i = 0; i < 9; i++)
 			{
-				tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
+				tempColor = std::move(getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]));
 				resultColor.b += (tempColor.b * coef[i]);
 				resultColor.g += (tempColor.g * coef[i]);
 				resultColor.r += (tempColor.r * coef[i]);
@@ -94,9 +98,7 @@ void LaplacianFilter::apply()
 			resultColor.g = std::clamp(resultColor.g, 0x00, 0xff);
 			resultColor.r = std::clamp(resultColor.r, 0x00, 0xff);
 
-			setPixels(img, w, d, row, col, resultColor);
+			setColor(img, w, d, row, col, resultColor);
 		}
 	}
-
-
 }

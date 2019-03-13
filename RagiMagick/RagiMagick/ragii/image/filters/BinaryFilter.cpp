@@ -1,8 +1,8 @@
-﻿#include "BinaryFilter.h"
+﻿#include <iostream>
+#include "BinaryFilter.h"
 
-
+using namespace std;
 using namespace ragii::image;
-
 
 void BinaryFilter::apply()
 {
@@ -10,27 +10,26 @@ void BinaryFilter::apply()
 	int h = m_Params.height;
 	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
+	const int threshold = 0x7f;
 
-	const int threshold = 0xaa;
-	uint8_t r, g, b, result;
+	if (d != 3 && d != 4) {
+		cout << "depth " << d << " not supported." << endl;
+		return;
+	}
 
 	for (int i = 0; i < w * h * d; i += d)
 	{
-		r = *(img + i + 0);
-		g = *(img + i + 1);
-		b = *(img + i + 2);
-		
-		if (r > threshold || g > threshold || b > threshold)
+		if (img[0] > threshold ||
+			img[1] > threshold ||
+			img[2] > threshold)
 		{
-			result = 0x00;
+			img[0] = img[1] = img[2] = 0xff;
 		}
 		else
 		{
-			result = 0xff;
+			img[0] = img[1] = img[2] = 0x00;
 		}
 
-		*(img + i + 0) = result;
-		*(img + i + 1) = result;
-		*(img + i + 2) = result;
+		img += d;
 	}
 }
