@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace ragii::image;
+using namespace ragii::text;
 
 struct CommandOption
 {
@@ -92,7 +93,7 @@ int convert(vector<CommandOption>& opts)
 		return EXIT_FAILURE;
 	}
 
-	if (!ragii::text::ends_with(in_file->value.data(), ".bmp"))
+	if (!ends_with(in_file->value.data(), ".bmp"))
 	{
 		cout << ".bmp 以外は非対応です。" << endl;
 		return EXIT_FAILURE;
@@ -143,13 +144,6 @@ int create(vector<CommandOption>& opts)
 		return EXIT_FAILURE;
 	}
 
-	auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-i"; });
-	if (in_file == opts.end())
-	{
-		cout << "入力ファイル名を指定してください。" << endl;
-		return EXIT_FAILURE;
-	}
-
 	auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
 	if (out_file == opts.end())
 	{
@@ -163,11 +157,21 @@ int create(vector<CommandOption>& opts)
 		cout << "-w (幅) を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
+	if (w->value.empty())
+	{
+		cout << "幅の値を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
 
 	auto h = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-h"; });
 	if (h == opts.end())
 	{
 		cout << "-h (高さ) を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+	if (h->value.empty())
+	{
+		cout << "高さの値を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
 
@@ -182,11 +186,26 @@ int create(vector<CommandOption>& opts)
 		cout << "ビット深度の値を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
-	if (!ragii::text::is_digit(d->value.data()[0]))
+	if (!is_digit(d->value.data()[0]))
 	{
 		cout << "ビット深度の値が不正です。" << endl;
 		return EXIT_FAILURE;
 	}
+
+	auto p = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-p"; });
+	if (p == opts.end())
+	{
+		cout << "-p (パターン) を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto bmp = 
+		Bitmap::create(
+			str_to_arithmetic<int32_t>(w->value.data()),
+			str_to_arithmetic<int32_t>(h->value.data()),
+			str_to_arithmetic<int16_t>(d->value.data()) * 8
+		);
+	bmp->save(out_file->value.data());
 
 	return EXIT_SUCCESS;
 }
