@@ -101,6 +101,8 @@ int convert(vector<CommandOption>& opts)
 		return EXIT_FAILURE;
 	}
 
+	cout << "width: " << bmp->getWidth() << ", height: " << bmp->getHeight() << ", depth: " << bmp->getBitCount() / 8 << endl;
+
 	auto filter = opts[0].name;
 
 	if (filter == "negative")
