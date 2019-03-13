@@ -33,6 +33,12 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 	fs.seekg(0, ios::beg);
 	fs.read(reinterpret_cast<char*>(&bmp->m_Header.File), BitmapFileHeaderSize);
 
+	if (!((bmp->m_Header.File.Type & 0xff) == 'B') && (bmp->m_Header.File.Type >> 8) == 'M')
+	{
+		cout << "invalid bitmap file header." << endl;
+		return nullptr;
+	}
+
 	auto remain = fileSize - static_cast<streampos>(BitmapFileHeaderSize);
 
 	if (BitmapInfoHeaderSize > remain)
@@ -58,9 +64,10 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 		return bmp;
 	}
 
-	bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.Info.SizeImage);
+	uint32_t dataSize = fileSize - static_cast<streampos>(bmp->m_Header.File.OffBits);
+	bmp->m_Data = make_unique<uint8_t[]>(dataSize);
 
-	fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), bmp->m_Header.Info.SizeImage);
+	fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), dataSize);
 	fs.close();
 
 	return bmp;
@@ -94,10 +101,12 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
 
 void Bitmap::save(string path)
 {
+	auto& info = m_Header.Info;
+
 	ofstream fs(path, ios::out | ios::binary);
 	fs.write(reinterpret_cast<char*>(&m_Header.File), BitmapFileHeaderSize);
 	fs.write(reinterpret_cast<char*>(&m_Header.Info), BitmapInfoHeaderSize);
-	fs.write(reinterpret_cast<char*>(m_Data.get()), m_Header.Info.SizeImage);
+	fs.write(reinterpret_cast<char*>(m_Data.get()), info.Width * info.Height * info.BitCount / 8);
 	fs.flush();
 	fs.close();
 }
