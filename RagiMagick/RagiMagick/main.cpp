@@ -17,6 +17,7 @@ struct CommandOption
 };
 
 int convert(vector<CommandOption>& opts);
+int create(vector<CommandOption>& opts);
 
 int main(int argc, char* argv[])
 {
@@ -59,6 +60,10 @@ int main(int argc, char* argv[])
 	if (command == "convert")
 	{
 		return convert(opts);
+	}
+	else if (command == "create")
+	{
+		return create(opts);
 	}
 
 	return EXIT_SUCCESS;
@@ -125,6 +130,63 @@ int convert(vector<CommandOption>& opts)
 
 	bmp->save(out_file->value.data());
 	cout << "converted." << endl;
+
+	return EXIT_SUCCESS;
+}
+
+// RagiMagick create -w 32 -h 32 -d 3 -p checkered -o out.bmp
+int create(vector<CommandOption>& opts)
+{
+	if (opts.empty())
+	{
+		cout << "オプションが不足しています。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-i"; });
+	if (in_file == opts.end())
+	{
+		cout << "入力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
+	if (out_file == opts.end())
+	{
+		cout << "出力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto w = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-w"; });
+	if (w == opts.end())
+	{
+		cout << "-w (幅) を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto h = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-h"; });
+	if (h == opts.end())
+	{
+		cout << "-h (高さ) を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+
+	auto d = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-d"; });
+	if (d == opts.end())
+	{
+		cout << "-d (ビット深度 3: 24bit, 4: 32bit) を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+	if (d->value.empty())
+	{
+		cout << "ビット深度の値を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+	if (!ragii::text::is_digit(d->value.data()[0]))
+	{
+		cout << "ビット深度の値が不正です。" << endl;
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }
