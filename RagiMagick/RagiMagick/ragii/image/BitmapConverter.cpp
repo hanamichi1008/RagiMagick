@@ -1,16 +1,15 @@
-﻿#include "BitmapConverter.h"
+﻿#include <chrono>
+#include <cstdio>
 #include "Bitmap.h"
+#include "BitmapConverter.h"
 #include "filters/IImageFilter.h"
 #include "filters/BinaryFilter.h"
 #include "filters/GrayscaleFilter.h"
 #include "filters/NegativeFilter.h"
 #include "filters/LaplacianFilter.h"
 
-
-using namespace ragii::image;
-
 using namespace std;
-
+using namespace ragii::image;
 
 void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 {
@@ -41,6 +40,13 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 	if (filter)
 	{
 		filter->setFilterParams(params);
+
+		auto start = chrono::system_clock::now();
+
 		filter->apply();
+
+		auto end = chrono::system_clock::now();
+		double elapsed = chrono::duration_cast<chrono::microseconds>(end - start).count();
+		printf("elapsed: %.3lf us\n", elapsed);
 	}
 }
