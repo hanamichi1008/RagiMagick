@@ -17,7 +17,8 @@ void GrayscaleFilter::apply()
 	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
 
-	if (d != 3 && d != 4) {
+	if (d != 3 && d != 4)
+	{
 		cout << "depth " << d << " not supported." << endl;
 		return;
 	}

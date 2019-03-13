@@ -12,7 +12,8 @@ void BinaryFilter::apply()
 	uint8_t* img = m_Params.image;
 	const int threshold = 0x7f;
 
-	if (d != 3 && d != 4) {
+	if (d != 3 && d != 4)
+	{
 		cout << "depth " << d << " not supported." << endl;
 		return;
 	}

@@ -11,12 +11,13 @@ void NegativeFilter::apply()
 	int d = m_Params.bitCount / 8;
 	uint8_t* img = m_Params.image;
 
-	if (d != 3 && d != 4) {
+	if (d != 3 && d != 4)
+	{
 		cout << "depth " << d << " not supported." << endl;
 		return;
 	}
 
-	for (int i = 0; i < w * h * d; i += d)
+	for (int i = 0; i < w * h; i++)
 	{
 		img[0] = 0xff - img[0];
 		img[1] = 0xff - img[1];
