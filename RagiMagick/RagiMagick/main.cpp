@@ -221,6 +221,23 @@ int create(vector<CommandOption>& opts)
 			str_to_arithmetic<int32_t>(h->value.data()),
 			str_to_arithmetic<int16_t>(d->value.data()) * 8
 		);
+
+	if (p->value == "checkered")
+	{
+		auto data = bmp->getData().get();
+		auto depth = bmp->getBitCount() / 8;
+		for (int x = 0; x < bmp->getHeight(); x++)
+		{
+			for (int y = 0; y < bmp->getWidth(); y++)
+			{
+				for (int i = 0; i < depth; i++)
+				{
+					*data++ = y ^ x;
+				}
+			}
+		}
+	}
+
 	bmp->save(out_file->value.data());
 
 	cout << "created." << endl;
