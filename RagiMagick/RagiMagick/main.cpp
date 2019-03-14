@@ -7,6 +7,32 @@
 #include "ragii/text/text.h"
 
 
+#ifdef _MSC_VER // MSVC
+#define ASM_BEGIN() __asm {
+#define ASM_DIRECTIVE(D)
+#define ASM_OPERAND0(OPCODE) OPCODE
+#define ASM_OPERAND1(OPCODE, OPERAND) OPCODE OPERAND
+#define ASM_OPERAND2(OPCODE, OPERAND1, OPERAND2) OPCODE OPERAND1, OPERAND2
+#define ASM_OUTPUT_BEGIN()
+#define ASM_OUTPUT_VALUE(MODE, VARIABLE)
+#define ASM_OUTPUT_END()
+#define ASM_END() }
+#else // clang or gcc
+#define ASM_BEGIN() asm volatile (
+#define ASM_TEXT(T) #T
+#define ASM_TEXT_LF(T) #T " \n"
+#define ASM_COMMA() ,
+#define ASM_DIRECTIVE(D) ASM_TEXT_LF(D)
+#define ASM_OPERAND0(OPCODE) ASM_TEXT_LF(OPCODE)
+#define ASM_OPERAND1(OPCODE, OPERAND) OPCODE OPERAND " \n"
+#define ASM_OPERAND2_IMPL(OPCODE, OPERANDS)  #OPCODE " " OPERANDS " \n"
+#define ASM_OPERAND2(OPCODE, ...) ASM_OPERAND2_IMPL(OPCODE, #__VA_ARGS__)
+#define ASM_OUTPUT_BEGIN() :
+#define ASM_OUTPUT_VALUE(MODE, VARIABLE) #MODE(VARIABLE)
+#define ASM_OUTPUT_END()
+#define ASM_END() );
+#endif
+
 using namespace std;
 using namespace ragii::image;
 using namespace ragii::text;
@@ -31,26 +57,40 @@ int main(int argc, char* argv[])
 
 void dumpSystemInfo()
 {
-	uint32_t eax, ebx, ecx, edx = 0;
-	asm volatile (
-		"xor %%eax, %%eax \n"
-		"cpuid \n"
-		: "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-	);
+	uint32_t a, b, c, d = 0;
+	//asm volatile (
+	//	".intel_syntax noprefix \n"
+	//	"xor %%eax, %%eax \n"
+	//	"cpuid \n"
+	//	: "=a" (a), "=b" (b), "=c" (c), "=d" (d)
+	//);
+
+	// 実験的にやってみた。やっぱり消す。共通化は無駄な労力。
+	ASM_BEGIN()
+		ASM_DIRECTIVE(.intel_syntax noprefix) // gcc だとコンパイルエラー
+		ASM_OPERAND2(xor, eax, eax)
+		ASM_OPERAND0(cpuid)
+		ASM_OUTPUT_BEGIN()
+			ASM_OUTPUT_VALUE(=a, a)
+		ASM_OUTPUT_END()
+#ifdef _MSC_VER
+		ASM_OPERAND2(mov, a, eax)
+#endif
+	ASM_END()
 
 	printf("===========================\n");
 	char values[4 + 1] = {};
-	arithmetic_to_str<char, uint32_t>(ebx, values);
-	printf("ebx: %s (0x%x)\n", values, ebx);
-	arithmetic_to_str<char, uint32_t>(edx, values);
-	printf("edx: %s (0x%x)\n", values, edx);
-	arithmetic_to_str<char, uint32_t>(ecx, values);
-	printf("ecx: %s (0x%x)\n", values, ecx);
+	arithmetic_to_str<char, uint32_t>(b, values);
+	printf("ebx: %s (0x%x)\n", values, b);
+	arithmetic_to_str<char, uint32_t>(d, values);
+	printf("edx: %s (0x%x)\n", values, d);
+	arithmetic_to_str<char, uint32_t>(c, values);
+	printf("ecx: %s (0x%x)\n", values, c);
 	printf("- - - - - - - - - - - - - -\n");
-	printf("eax: 0x%x\n", eax);
-	printf("ebx: 0x%x\n", ebx);
-	printf("ecx: 0x%x\n", ecx);
-	printf("edx: 0x%x\n", edx);
+	printf("eax: 0x%x\n", a);
+	printf("ebx: 0x%x\n", b);
+	printf("ecx: 0x%x\n", c);
+	printf("edx: 0x%x\n", d);
 	printf("===========================\n");
 }
 
