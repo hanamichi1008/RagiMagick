@@ -34,7 +34,8 @@ int main(int argc, char* argv[])
 		auto opt = string_view(argv[i]);
 		if (opt[0] == '-')
 		{
-			opts.emplace_back(CommandOption { argv[i], argv[i + 1] });
+			auto value = i + 1 < argc ? argv[i + 1] : "";
+			opts.emplace_back(CommandOption { argv[i], value });
 			i += 2;
 		}
 		else
@@ -85,9 +86,19 @@ int convert(vector<CommandOption>& opts)
 		cout << "入力ファイル名を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
+	if (in_file->value.empty())
+	{
+		cout << "入力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
 
 	auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
 	if (out_file == opts.end())
+	{
+		cout << "出力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
+	if (out_file->value.empty())
 	{
 		cout << "出力ファイル名を指定してください。" << endl;
 		return EXIT_FAILURE;
@@ -150,6 +161,11 @@ int create(vector<CommandOption>& opts)
 		cout << "出力ファイル名を指定してください。" << endl;
 		return EXIT_FAILURE;
 	}
+	if (out_file->value.empty())
+	{
+		cout << "出力ファイル名を指定してください。" << endl;
+		return EXIT_FAILURE;
+	}
 
 	auto w = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-w"; });
 	if (w == opts.end())
@@ -206,6 +222,8 @@ int create(vector<CommandOption>& opts)
 			str_to_arithmetic<int16_t>(d->value.data()) * 8
 		);
 	bmp->save(out_file->value.data());
+
+	cout << "created." << endl;
 
 	return EXIT_SUCCESS;
 }
