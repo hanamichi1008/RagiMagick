@@ -118,17 +118,18 @@ namespace ragii { namespace text {
 	template<
 		class C,
 		class T,
-		size_t SZ = sizeof(T),
+		size_t C_SZ = sizeof(C),
+		size_t T_SZ = sizeof(T),
 		typename std::enable_if<std::is_arithmetic_v<T>, std::nullptr_t>::type = nullptr,
 		typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr
 	>
-	constexpr void arithmetic_to_str(T t, C (&result)[SZ + 1])
+	constexpr void arithmetic_to_str(T t, C (&result)[T_SZ + 1])
 	{
 		C* p = result;
 		T tmp = t;
-		for (size_t i = 0; i < SZ; i++) {
+		for (size_t i = 0; i < T_SZ; i++) {
 			p[i] = tmp & 0xff;
-			tmp >>= 8;
+			tmp >>= (C_SZ * 8);
 		}
 	}
 
