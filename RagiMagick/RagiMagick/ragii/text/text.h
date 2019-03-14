@@ -114,6 +114,23 @@ namespace ragii { namespace text {
 		return result;
 	}
 
+	// 算術型から文字列型へ変換
+	template<
+		class C,
+		class T,
+		typename std::enable_if<std::is_arithmetic_v<T>, std::nullptr_t>::type = nullptr,
+		typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr
+	>
+	constexpr void arithmetic_to_str(T t, C* result)
+	{
+		C* p = result;
+		T tmp = t;
+		for (size_t i = 0; i < sizeof(T); i++) {
+			*p++ = tmp & 0xff;
+			tmp >>= 8;
+		}
+	}
+
 	template<
 		class C,
 		typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr

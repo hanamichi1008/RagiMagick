@@ -17,13 +17,48 @@ struct CommandOption
 	string_view value;
 };
 
+void dumpSystemInfo();
+int process(int argc, char* argv[]);
 int convert(vector<CommandOption>& opts);
 int create(vector<CommandOption>& opts);
 
 int main(int argc, char* argv[])
 {
+	dumpSystemInfo();
+
+	return process(argc, argv);
+}
+
+void dumpSystemInfo()
+{
+	uint32_t eax, ebx, ecx, edx = 0;
+	asm volatile (
+		"xor %%eax, %%eax \n"
+		"cpuid \n"
+		: "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+	);
+
+	printf("===========================\n");
+	char values[4 + 1] = {};
+	arithmetic_to_str<char, uint32_t>(ebx, values);
+	printf("ebx: %s (0x%x)\n", values, ebx);
+	arithmetic_to_str<char, uint32_t>(edx, values);
+	printf("edx: %s (0x%x)\n", values, edx);
+	arithmetic_to_str<char, uint32_t>(ecx, values);
+	printf("ecx: %s (0x%x)\n", values, ecx);
+	printf("- - - - - - - - - - - - - -\n");
+	printf("eax: 0x%x\n", eax);
+	printf("ebx: 0x%x\n", ebx);
+	printf("ecx: 0x%x\n", ecx);
+	printf("edx: 0x%x\n", edx);
+	printf("===========================\n");
+}
+
+int process(int argc, char* argv[])
+{
 	if (argc < 2)
 	{
+		cout << "コマンドを指定してください。 convert, etc." << endl;
 		return EXIT_FAILURE;
 	}
 
@@ -67,10 +102,14 @@ int main(int argc, char* argv[])
 	{
 		return create(opts);
 	}
+	else
+	{
+		cout << "コマンドを指定してください。 convert, etc." << endl;
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }
-
 
 int convert(vector<CommandOption>& opts)
 {
@@ -226,9 +265,9 @@ int create(vector<CommandOption>& opts)
 	{
 		auto data = bmp->getData().get();
 		auto depth = bmp->getBitCount() / 8;
-		for (int x = 0; x < bmp->getHeight(); x++)
+		for (int y = 0; y < bmp->getHeight(); y++)
 		{
-			for (int y = 0; y < bmp->getWidth(); y++)
+			for (int x = 0; x < bmp->getWidth(); x++)
 			{
 				for (int i = 0; i < depth; i++)
 				{
