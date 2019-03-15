@@ -7,32 +7,6 @@
 #include "ragii/text/text.h"
 
 
-#ifdef _MSC_VER // MSVC
-#define ASM_BEGIN() __asm {
-#define ASM_DIRECTIVE(D)
-#define ASM_OPERAND0(OPCODE) OPCODE
-#define ASM_OPERAND1(OPCODE, OPERAND) OPCODE OPERAND
-#define ASM_OPERAND2(OPCODE, OPERAND1, OPERAND2) OPCODE OPERAND1, OPERAND2
-#define ASM_OUTPUT_BEGIN()
-#define ASM_OUTPUT_VALUE(MODE, VARIABLE)
-#define ASM_OUTPUT_END()
-#define ASM_END() }
-#else // clang or gcc
-#define ASM_BEGIN() asm volatile (
-#define ASM_TEXT(T) #T
-#define ASM_TEXT_LF(T) #T " \n"
-#define ASM_COMMA() ,
-#define ASM_DIRECTIVE(D) ASM_TEXT_LF(D)
-#define ASM_OPERAND0(OPCODE) ASM_TEXT_LF(OPCODE)
-#define ASM_OPERAND1(OPCODE, OPERAND) OPCODE OPERAND " \n"
-#define ASM_OPERAND2_IMPL(OPCODE, OPERANDS)  #OPCODE " " OPERANDS " \n"
-#define ASM_OPERAND2(OPCODE, ...) ASM_OPERAND2_IMPL(OPCODE, #__VA_ARGS__)
-#define ASM_OUTPUT_BEGIN() :
-#define ASM_OUTPUT_VALUE(MODE, VARIABLE) #MODE(VARIABLE)
-#define ASM_OUTPUT_END()
-#define ASM_END() );
-#endif
-
 using namespace std;
 using namespace ragii::image;
 using namespace ragii::text;
@@ -58,25 +32,30 @@ int main(int argc, char* argv[])
 void dumpSystemInfo()
 {
 	uint32_t a, b, c, d = 0;
-	//asm volatile (
-	//	".intel_syntax noprefix \n"
-	//	"xor %%eax, %%eax \n"
-	//	"cpuid \n"
-	//	: "=a" (a), "=b" (b), "=c" (c), "=d" (d)
-	//);
 
-	// 実験的にやってみた。やっぱり消す。共通化は無駄な労力。
-	ASM_BEGIN()
-		ASM_DIRECTIVE(.intel_syntax noprefix) // gcc だとコンパイルエラー
-		ASM_OPERAND2(xor, eax, eax)
-		ASM_OPERAND0(cpuid)
-		ASM_OUTPUT_BEGIN()
-			ASM_OUTPUT_VALUE(=a, a)
-		ASM_OUTPUT_END()
 #ifdef _MSC_VER
-		ASM_OPERAND2(mov, a, eax)
+#ifdef _M_X64
+#error 非対応アーキテクチャ！
 #endif
-	ASM_END()
+	__asm
+	{
+		mov eax, 0
+		cpuid
+		mov a, eax
+		mov b, ebx
+		mov c, ecx
+		mov d, edx
+	}
+#else
+	asm volatile (
+#ifdef __clang__
+		".intel_syntax noprefix \n"
+#endif
+		"xor %%eax, %%eax \n"
+		"cpuid \n"
+		: "=a" (a), "=b" (b), "=c" (c), "=d" (d)
+	);
+#endif
 
 	printf("===========================\n");
 	char values[4 + 1] = {};
@@ -311,7 +290,7 @@ int create(vector<CommandOption>& opts)
 			{
 				for (int i = 0; i < depth; i++)
 				{
-					*data++ = y ^ x;
+					*data++ = static_cast<uint8_t>(y ^ x);
 				}
 			}
 		}
