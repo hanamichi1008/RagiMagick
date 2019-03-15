@@ -42,43 +42,46 @@ void GrayscaleFilter::apply()
 	__m128i mapping_a = _mm_setr_epi8(3, -1, -1, -1, 7, -1, -1, -1, 11, -1, -1, -1, 15, -1, -1, -1);
 	__m128i mapping_result = _mm_setr_epi8(0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1);
 
+	__m128i src;
+	__m128i shuffle_b, shuffle_g, shuffle_r, shuffle_result;
+	__m128 s_b, s_g, s_r;
+	__m128 m_b, m_g, m_r;
+	__m128 s_gray;
+	__m128i i_gray;
+
 	for (int i = 0; i < w * h; i += 4)
 	{
 		// TODO: グレースケールにはなったけど・・・なぜがモザイクが掛かったようになってしまった。直す。
 
 		// 4px (4bytes/px * 4) ロード
-		auto src = _mm_load_si128(reinterpret_cast<__m128i*>(img));
+		src = _mm_load_si128(reinterpret_cast<__m128i*>(img));
 
 		// 並べ替え
-		auto shuffle_b = _mm_shuffle_epi8(src, mapping_b);
-		auto shuffle_g = _mm_shuffle_epi8(src, mapping_g);
-		auto shuffle_r = _mm_shuffle_epi8(src, mapping_r);
-		auto shuffle_a = _mm_shuffle_epi8(src, mapping_a);
+		shuffle_b = _mm_shuffle_epi8(src, mapping_b);
+		shuffle_g = _mm_shuffle_epi8(src, mapping_g);
+		shuffle_r = _mm_shuffle_epi8(src, mapping_r);
 
 		// float化(係数の型に合わせる)
-		auto s_b = _mm_cvtepi32_ps(shuffle_b);
-		auto s_g = _mm_cvtepi32_ps(shuffle_g);
-		auto s_r = _mm_cvtepi32_ps(shuffle_r);
-		auto s_a = _mm_cvtepi32_ps(shuffle_a);
+		s_b = _mm_cvtepi32_ps(shuffle_b);
+		s_g = _mm_cvtepi32_ps(shuffle_g);
+		s_r = _mm_cvtepi32_ps(shuffle_r);
 
 		// 乗算
-		auto m_b = _mm_mul_ps(s_b, weight_b);
-		auto m_g = _mm_mul_ps(s_g, weight_g);
-		auto m_r = _mm_mul_ps(s_r, weight_r);
-		auto m_a = _mm_mul_ps(s_a, weight_a);
+		m_b = _mm_mul_ps(s_b, weight_b);
+		m_g = _mm_mul_ps(s_g, weight_g);
+		m_r = _mm_mul_ps(s_r, weight_r);
 
 		// 加算
-		auto s_gray = _mm_add_ps(_mm_add_ps(m_b, m_g), m_r);
+		s_gray = _mm_add_ps(_mm_add_ps(m_b, m_g), m_r);
 
 		// uint8化(格納する型に合わせる)
-		auto i_gray = _mm_cvtps_epi32(s_gray);
+		i_gray = _mm_cvtps_epi32(s_gray);
 
 		// 並べ替え
-		auto shuffle_result = _mm_shuffle_epi8(i_gray, mapping_result);
+		shuffle_result = _mm_shuffle_epi8(i_gray, mapping_result);
 
 		// 格納
 		_mm_store_si128(reinterpret_cast<__m128i*>(img), shuffle_result);
-		
 
 		img += 16;
 	}
