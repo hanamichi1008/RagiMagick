@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.14)
 add_subdirectory(filters)
-add_library(Image
+add_library(ragii-image
   Bitmap.cpp
   BitmapConverter.cpp
 )
-target_link_libraries(Image Filters)
+target_link_libraries(ragii-image ragii-filters)
