@@ -46,12 +46,9 @@ void dumpSystemInfo()
 		mov c, ecx
 		mov d, edx
 	}
-#else
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
 	asm volatile (
-#ifdef __clang__
-		".intel_syntax noprefix \n"
-#endif
-		"xor %%eax, %%eax \n"
+		"movl $0, %%eax \n"
 		"cpuid \n"
 		: "=a" (a), "=b" (b), "=c" (c), "=d" (d)
 	);

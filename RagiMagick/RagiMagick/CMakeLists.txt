@@ -11,7 +11,11 @@ add_executable(RagiMagick main.cpp)
 
 if (MSVC)
     # 効かない・・・
-    # add_compile_options(/W4)
+    # add_compile_options(/W4 /WX)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU|AppleClang)
+    # 効かない・・・
+    # add_compile_options(-Wall -Wextra -pedantic -Werror)
+    # add_compile_options(-msse2 -msse3 -msse4.1 -msse4.2 -mavx -mavx2)
 endif()
 
 # 効かない・・・
