@@ -62,10 +62,24 @@ namespace
 
 		for (int i = 0; i < w * h; i += 8)
 		{
+			// ロード (32bit * 8px = 256bit)
 			auto a = _mm256_load_si256(reinterpret_cast<__m256i*>(img));
-			auto b = _mm256_set1_epi32(THRESHOLD);
-			auto c = _mm256_cmpgt_epi32(a, b);
-			_mm256_store_si256(reinterpret_cast<__m256i*>(img), c);
+
+			// 閾値 (8bit単位)
+			auto b = _mm256_set1_epi8(THRESHOLD);
+
+			// c[i] = a[i] > b[i] ? 0xff : 0x00
+			auto c = _mm256_cmpgt_epi8(a, b);
+
+			// d = (c[i+0] + c[i+1] + c[i+2] + c[i+3]) * 8
+			auto d = _mm256_hadd_epi32(c, c);
+
+			// e[i] = d[i] > 0x00 ? 0xff : 0x00;
+			auto e = _mm256_cmpgt_epi8(d, _mm256_setzero_si256());
+
+			// 格納
+			_mm256_store_si256(reinterpret_cast<__m256i*>(img), e);
+
 			img += 32;
 		}
 	}
