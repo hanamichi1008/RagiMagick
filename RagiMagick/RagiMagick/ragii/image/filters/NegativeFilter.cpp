@@ -1,9 +1,5 @@
 ﻿#include <iostream>
-#ifdef _MSC_VER
-  #include <intrin.h>
-#else
-  #include <x86intrin.h>
-#endif
+#include "common.h"
 #include "NegativeFilter.h"
 
 using namespace std;
