@@ -17,5 +17,6 @@ add_library(ragii-filters
   GaussianFilter.cpp
   GrayscaleFilter.cpp
   LaplacianFilter.cpp
+  MosaicFilter.cpp
   NegativeFilter.cpp
 )

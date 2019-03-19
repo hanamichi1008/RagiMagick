@@ -8,6 +8,7 @@
 #include "filters/NegativeFilter.h"
 #include "filters/LaplacianFilter.h"
 #include "filters/GaussianFilter.h"
+#include "filters/MosaicFilter.h"
 
 using namespace std;
 using namespace ragii::image;
@@ -38,6 +39,9 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 		break;
 	case FilterType::Gaussian:
 		filter = make_unique<GaussianFilter>();
+		break;
+	case FilterType::Mosaic:
+		filter = make_unique<MosaicFilter>();
 		break;
 	}
 

@@ -9,6 +9,7 @@ namespace ragii { namespace image {
 		Negative,
 		Laplacian,
 		Gaussian,
+		Mosaic,
 	};
 
 } }

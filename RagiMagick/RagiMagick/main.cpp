@@ -199,6 +199,10 @@ int convert(vector<CommandOption>& opts)
 	{
 		BitmapConverter::applyFilter(bmp.get(), FilterType::Gaussian);
 	}
+	else if (filter == "mosaic")
+	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Mosaic);
+	}
 
 	bmp->save(out_file->value.data());
 	cout << "converted." << endl;
