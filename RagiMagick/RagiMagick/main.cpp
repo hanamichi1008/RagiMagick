@@ -191,7 +191,8 @@ int convert(vector<CommandOption>& opts)
 	}
 	else if (filter == "laplacian")
 	{
-		BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
+		// BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
 		BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
 	}
 

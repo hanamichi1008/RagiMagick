@@ -47,34 +47,19 @@ void LaplacianFilter::apply()
 		return;
 	}
 
-	int coef[] =
-	{
-		-1, -1, -1,
-		-1,  8, -1,
-		-1, -1, -1
-	};
-
+	// 係数
+	int coef[] = { -1, -1, -1, -1,  8, -1, -1, -1, -1 };
 	// 原画像(デバッグ時確認用)
-	//int coef[] =
-	//{
-	//	0, 0, 0,
-	//	0, 1, 0,
-	//	0, 0, 0
-	//};
+	// int coef[] = { 0, 0, 0, 0, 1, 0, 0, 0, 0 };
 
-	int rowOffsets[] =
-	{
-		-1, -1, -1,
-		 0,  0,  0,
-		 1,  1,  1
-	};
+	// 基準ピクセルからの行オフセット
+	int rowOffsets[] = { -1, -1, -1, 0, 0, 0, 1,  1,  1 };
+	// 基準ピクセルからの列オフセット
+	int bgrColOffsets[] = { -3, 0, 3, -3, 0, 3, -3, 0, 3 };
+	// 基準ピクセルからの列オフセット
+	int bgraColOffsets[] = { -4, 0, 4, -4, 0, 4, -4, 0, 4 };
 
-	int colOffsets[] = 
-	{
-		-3,  0,  3,
-		-3,  0,  3,
-		-3,  0,  3
-	};
+	const int* colOffsets = d == 3 ? bgrColOffsets : bgraColOffsets;
 
 	int row, col = 0;
 	int i = 0;
