@@ -7,7 +7,8 @@ namespace ragii { namespace image {
 		Binary,
 		Grayscale,
 		Negative,
-		Laplacian
+		Laplacian,
+		Gaussian,
 	};
 
 } }

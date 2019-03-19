@@ -14,6 +14,7 @@ endif()
 
 add_library(ragii-filters
   BinaryFilter.cpp
+  GaussianFilter.cpp
   GrayscaleFilter.cpp
   LaplacianFilter.cpp
   NegativeFilter.cpp

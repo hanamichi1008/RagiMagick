@@ -195,6 +195,10 @@ int convert(vector<CommandOption>& opts)
 		BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
 		BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
 	}
+	else if (filter == "gaussian")
+	{
+		BitmapConverter::applyFilter(bmp.get(), FilterType::Gaussian);
+	}
 
 	bmp->save(out_file->value.data());
 	cout << "converted." << endl;
