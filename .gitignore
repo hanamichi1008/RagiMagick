@@ -1,17 +1,10 @@
-# dir
+### dir
 .vs
-RagiMagick/Release/
-RagiMagick/x64/
-RagiMagick/RagiMagick/Debug/
-RagiMagick/RagiMagick/Release/
-RagiMagick/RagiMagick/x64/
-
-# file
-*.filters
-
-
 # For Compiling with CMake
 build/
 
+
+### file
+*.filters
 # For MacOS
 .DS_Store
