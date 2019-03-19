@@ -7,7 +7,7 @@ using namespace ragii::image;
 
 namespace
 {
-	const int THRESHOLD = 0x7f;
+	const int THRESHOLD = 50;
 
 	inline void binary_normal(uint8_t* img, int w, int h, int d)
 	{
@@ -60,25 +60,19 @@ namespace
 			return;
 		}
 
+		const __m256i th1 = _mm256_set1_epi8(THRESHOLD); // 閾値 (8bit単位)
+		const __m256i th2 = _mm256_set1_epi32(0); // 閾値 (32bit単位)
+		__m256i src, dst;
+
 		for (int i = 0; i < w * h; i += 8)
 		{
 			// ロード (32bit * 8px = 256bit)
-			auto a = _mm256_load_si256(reinterpret_cast<__m256i*>(img));
-
-			// 閾値 (8bit単位)
-			auto b = _mm256_set1_epi8(THRESHOLD);
-
-			// c[i] = a[i] > b[i] ? 0xff : 0x00
-			auto c = _mm256_cmpgt_epi8(a, b);
-
-			// d = (c[i+0] + c[i+1] + c[i+2] + c[i+3]) * 8
-			auto d = _mm256_hadd_epi32(c, c);
-
-			// e[i] = d[i] > 0x00 ? 0xff : 0x00;
-			auto e = _mm256_cmpgt_epi8(d, _mm256_setzero_si256());
-
-			// 格納
-			_mm256_store_si256(reinterpret_cast<__m256i*>(img), e);
+			src = _mm256_load_si256(reinterpret_cast<__m256i*>(img));
+			// BGR各成分で閾値を超えているかチェック TODO: Aが0前提なのを直す
+			dst = _mm256_cmpgt_epi8(src, th1);
+			// BGRA 全てが 0 なら 0x00000000、そうでなければ 0xffffffff になる
+			dst = _mm256_cmpgt_epi32(dst, th2);
+			_mm256_store_si256(reinterpret_cast<__m256i*>(img), dst);
 
 			img += 32;
 		}
