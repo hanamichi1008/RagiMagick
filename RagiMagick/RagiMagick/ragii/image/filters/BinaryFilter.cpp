@@ -42,12 +42,20 @@ namespace
 			return;
 		}
 
+		const __m128i th1 = _mm_set1_epi8(THRESHOLD); // 閾値 (8bit単位)
+		const __m128i th2 = _mm_set1_epi32(0); // 閾値 (32bit単位)
+		__m128i src, dst;
+
 		for (int i = 0; i < w * h; i += 4)
 		{
-			auto a = _mm_load_si128(reinterpret_cast<__m128i*>(img));
-			auto b = _mm_set1_epi32(THRESHOLD);
-			auto c = _mm_comgt_epi32(a, b);
-			_mm_store_si128(reinterpret_cast<__m128i*>(img), c);
+			// ロード (32bit * 4px = 128bit)
+			src = _mm_load_si128(reinterpret_cast<__m128i*>(img));
+			// BGR各成分で閾値を超えているかチェック TODO: Aが0前提なのを直す
+			dst = _mm_cmpgt_epi8(src, th1);
+			// BGRA 全てが 0 なら 0x00000000、そうでなければ 0xffffffff になる
+			dst = _mm_cmpgt_epi32(dst, th2);
+			_mm_store_si128(reinterpret_cast<__m128i*>(img), dst);
+
 			img += 16;
 		}
 	}
