@@ -29,13 +29,11 @@ void GrayscaleFilter::apply()
 	__m128 weight_b = _mm_set_ps1(WEIGHT_B);
 	__m128 weight_g = _mm_set_ps1(WEIGHT_G);
 	__m128 weight_r = _mm_set_ps1(WEIGHT_R);
-	__m128 weight_a = _mm_set_ps1(0.0f);
 
 	// 配置先
 	__m128i mapping_b = _mm_setr_epi8(0, -1, -1, -1, 4, -1, -1, -1,  8, -1, -1, -1, 12, -1, -1, -1);
 	__m128i mapping_g = _mm_setr_epi8(1, -1, -1, -1, 5, -1, -1, -1,  9, -1, -1, -1, 13, -1, -1, -1);
 	__m128i mapping_r = _mm_setr_epi8(2, -1, -1, -1, 6, -1, -1, -1, 10, -1, -1, -1, 14, -1, -1, -1);
-	__m128i mapping_a = _mm_setr_epi8(3, -1, -1, -1, 7, -1, -1, -1, 11, -1, -1, -1, 15, -1, -1, -1);
 	__m128i mapping_result = _mm_setr_epi8(0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1);
 
 	__m128i src;

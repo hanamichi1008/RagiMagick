@@ -191,8 +191,8 @@ namespace ragii { namespace text {
 			if (*base != *search) {
 				return false;
 			}
-			*base++;
-			*search++;
+			base++;
+			search++;
 		}
 		return true;
 	}

@@ -124,7 +124,7 @@ void MosaicFilter::apply()
 
             for (i = 0; i < blockSize; i++)
             {
-                tempColor = std::move(getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]));
+                tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
                 resultColor.b += tempColor.b;
                 resultColor.g += tempColor.g;
                 resultColor.r += tempColor.r;

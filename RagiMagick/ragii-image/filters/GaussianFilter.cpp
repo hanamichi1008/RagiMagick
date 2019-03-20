@@ -117,7 +117,7 @@ void GaussianFilter::apply()
     Color tempColor = {};
     Color resultColor = {};
 
-// TODO(YouGi): 何かで判断して実行時に切り替えたい
+// TODO: 何かで判断して実行時に切り替えたい
 #define USE_SMALL_KERNEL 0
 #if USE_SMALL_KERNEL
     const auto& kernel = SmallKernel;
@@ -137,7 +137,7 @@ void GaussianFilter::apply()
 
             for (i = 0; i < kernel.size(); i++)
             {
-                tempColor = std::move(getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]));
+                tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
                 resultColor.b += static_cast<int>(tempColor.b * kernel[i]);
                 resultColor.g += static_cast<int>(tempColor.g * kernel[i]);
                 resultColor.r += static_cast<int>(tempColor.r * kernel[i]);

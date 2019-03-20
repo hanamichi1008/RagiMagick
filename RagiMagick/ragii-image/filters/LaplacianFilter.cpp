@@ -74,7 +74,7 @@ void LaplacianFilter::apply()
 
 			for (i = 0; i < 9; i++)
 			{
-				tempColor = std::move(getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]));
+				tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
 				resultColor.b += (tempColor.b * coef[i]);
 				resultColor.g += (tempColor.g * coef[i]);
 				resultColor.r += (tempColor.r * coef[i]);

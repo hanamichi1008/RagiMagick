@@ -22,7 +22,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
 	auto fileSize = fs.seekg(0, ios::end).tellg();
 
-	if (BitmapFileHeaderSize > fileSize)
+	if (BitmapFileHeaderSize > static_cast<size_t>(fileSize))
 	{
 		cout << "invalid bitmap file header." << endl;
 		return nullptr;
@@ -41,7 +41,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
 	auto remain = fileSize - static_cast<streampos>(BitmapFileHeaderSize);
 
-	if (BitmapInfoHeaderSize > remain)
+	if (BitmapInfoHeaderSize > static_cast<size_t>(remain))
 	{
 		cout << "invalid bitmap info header." << endl;
 		return bmp;
