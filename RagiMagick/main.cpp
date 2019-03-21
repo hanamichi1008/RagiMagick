@@ -109,8 +109,6 @@ int process(int argc, char* argv[])
 
     cout << "コマンドを指定してください。 convert, etc." << endl;
     return EXIT_FAILURE;
-
-    return EXIT_SUCCESS;
 }
 
 int convert(vector<CommandOption>& opts)
