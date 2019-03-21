@@ -1,6 +1,7 @@
 ﻿#include <array>
 #include "MosaicFilter.h"
 #include <iostream>
+#include <algorithm>
 #include "common.h"
 
 using namespace std;
@@ -78,7 +79,7 @@ void MosaicFilter::apply()
     Color tempColor = {};
     Color resultColor = {};
 
-// TODO(YouGi): 何かで判断して実行時に切り替えたい
+// TODO: 何かで判断して実行時に切り替えたい
 #define USE_SMALL_BLOCK 0
 #if USE_SMALL_BLOCK
     int blockSize = SmallBlockSize;
@@ -92,7 +93,7 @@ void MosaicFilter::apply()
         d == 3 ? LargeBlockColOffsetsBGR : LargeBlockColOffsetsBGRA;
 #endif
 
-    // TODO(YouGi): 何も考えずに書いたから全部見直す。
+    // TODO: 何も考えずに書いたから全部見直す。
     for (row = 1; row < h - 1; row++) {
         for (col = d; col < w * d - d; col += d) {
             resultColor = {};

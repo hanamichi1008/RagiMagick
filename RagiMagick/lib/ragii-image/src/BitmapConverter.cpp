@@ -1,6 +1,7 @@
 ﻿#include <chrono>
-#include "BitmapConverter.h"
 #include <cstdio>
+#include <iostream>
+#include "BitmapConverter.h"
 #include "Bitmap.h"
 #include "filters/BinaryFilter.h"
 #include "filters/GaussianFilter.h"
@@ -54,6 +55,6 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
         auto end = chrono::system_clock::now();
         auto elapsed =
             chrono::duration_cast<chrono::microseconds>(end - start).count();
-        printf("elapsed: %lld us\n", elapsed);
+        cout << "elapsed: " << elapsed << " us" << endl;
     }
 }
