@@ -1,7 +1,7 @@
 ﻿#include <array>
 #include "GaussianFilter.h"
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include "common.h"
 
 using namespace std;

@@ -1,7 +1,7 @@
 ﻿#include <chrono>
+#include "BitmapConverter.h"
 #include <cstdio>
 #include <iostream>
-#include "BitmapConverter.h"
 #include "Bitmap.h"
 #include "filters/BinaryFilter.h"
 #include "filters/GaussianFilter.h"
