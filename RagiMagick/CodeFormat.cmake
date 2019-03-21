@@ -10,6 +10,7 @@ function(format_code target_name)
     add_custom_target(
         ${target_name}
         COMMAND "${CLANG_FORMAT_EXE}" -style=file -i ${MY_ALL_SOURCES}
+        COMMENT "formatting..."
     )
 
 endfunction()
