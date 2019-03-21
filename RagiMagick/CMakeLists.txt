@@ -9,6 +9,7 @@ project(RagiMagick CXX)
 
 if (MSVC)
     add_compile_options(/W4 /WX)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMAKE_PROJECT_NAME})
 elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU|AppleClang)
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
