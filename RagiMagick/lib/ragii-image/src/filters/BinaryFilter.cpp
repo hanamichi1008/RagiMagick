@@ -1,4 +1,6 @@
 ﻿#include <iostream>
+#include <numeric>
+#include <vector>
 #include "common.h"
 #include "BinaryFilter.h"
 
@@ -9,6 +11,30 @@ namespace
 {
     const int THRESHOLD = 50;
 
+    inline uint8_t search_average(uint8_t* img, int w, int h, int d)
+    {
+        uint8_t result = 0;
+        vector<uint8_t> horiz(w);
+        vector<uint8_t> vert(h);
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0, i = 0; x < w * d; i++, x += d) {
+                if (d == 3) {
+                    horiz[i] = static_cast<uint8_t>((img[x] + img[x + 1] + img[x + 2]) / 3);
+                }
+                else if (d == 4) {
+                    horiz[i] = static_cast<uint8_t>((img[x] + img[x + 1] + img[x + 2]) / 3);
+                }
+                img += d;
+            }
+            vert[y] = static_cast<uint8_t>(std::accumulate(horiz.begin(), horiz.end(), 0) / w);
+        }
+
+        result = static_cast<uint8_t>(std::accumulate(vert.begin(), vert.end(), 0) / h);
+
+        return result;
+    }
+
     inline void binary_normal(uint8_t* img, int w, int h, int d)
     {
         if (d != 3 && d != 4) {
@@ -16,8 +42,10 @@ namespace
             return;
         }
 
+        const uint8_t threshold = search_average(img, w, h, d);
+
         for (int i = 0; i < w * h * d; i += d) {
-            if (img[0] > THRESHOLD || img[1] > THRESHOLD || img[2] > THRESHOLD) {
+            if (img[0] > threshold || img[1] > threshold || img[2] > threshold) {
                 img[0] = img[1] = img[2] = 0xff;
             }
             else {
@@ -52,7 +80,7 @@ namespace
         }
     }
 
-    void binary_avx(uint8_t* img, int w, int h, int d)
+    void binary_avx2(uint8_t* img, int w, int h, int d)
     {
         if (d != 4) {
             cout << "depth " << d << " not supported." << endl;
@@ -67,7 +95,7 @@ namespace
             // ロード (32bit * 8px = 256bit)
             src = _mm256_load_si256(reinterpret_cast<__m256i*>(img));
             // BGR各成分で閾値を超えているかチェック TODO: Aが0前提なのを直す
-            dst = _mm256_cmpgt_epi8(src, th1);  // TODO: AVX2からだった。自宅の Sandy では Illegal instruction。直す。
+            dst = _mm256_cmpgt_epi8(src, th1);  // これだけが AVX2 以降の命令
             // BGRA 全てが 0 なら 0x00000000、そうでなければ 0xffffffff になる
             dst = _mm256_cmpgt_epi32(dst, th2);
             _mm256_store_si256(reinterpret_cast<__m256i*>(img), dst);
@@ -75,6 +103,7 @@ namespace
             img += 32;
         }
     }
+
 }  // namespace
 
 void BinaryFilter::apply()
@@ -92,12 +121,11 @@ void BinaryFilter::apply()
             break;
 
         case 1:
-            binary_sse42(img, w, h,
-                         d);  // TODO: "Illegal instruction: 4" ... orz
+            binary_sse42(img, w, h, d);
             break;
 
         case 2:
-            binary_avx(img, w, h, d);
+            binary_avx2(img, w, h, d);
             break;
     }
 }
