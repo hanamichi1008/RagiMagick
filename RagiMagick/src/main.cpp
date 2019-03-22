@@ -3,13 +3,15 @@
 #include <functional>
 #include <iostream>
 
+#include "ragii/include/text/text.h"
+#include "ragii/include/hardware/cpu_info.h"
 #include "ragii-image/include/Bitmap.h"
 #include "ragii-image/include/BitmapConverter.h"
-#include "ragii/include/text/text.h"
 
 using namespace std;
 using namespace ragii::image;
 using namespace ragii::text;
+using namespace ragii::hardware;
 
 struct CommandOption
 {
@@ -31,42 +33,9 @@ int main(int argc, char* argv[])
 
 void dumpSystemInfo()
 {
-    uint32_t a, b, c, d = 0;
+    CpuInfo info;
 
-#ifdef _MSC_VER
-#    ifdef _M_X64
-#        error 非対応アーキテクチャ！
-#    endif
-    __asm
-    {
-        mov eax, 0
-        cpuid
-        mov a, eax
-        mov b, ebx
-        mov c, ecx
-        mov d, edx
-    }
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-    asm volatile(
-        "movl $0, %%eax \n"
-        "cpuid \n"
-        : "=a"(a), "=b"(b), "=c"(c), "=d"(d));
-#endif
-
-    printf("===========================\n");
-    char values[4 + 1] = {};
-    arithmetic_to_str<char, uint32_t>(b, values);
-    printf("ebx: %s (0x%x)\n", values, b);
-    arithmetic_to_str<char, uint32_t>(d, values);
-    printf("edx: %s (0x%x)\n", values, d);
-    arithmetic_to_str<char, uint32_t>(c, values);
-    printf("ecx: %s (0x%x)\n", values, c);
-    printf("- - - - - - - - - - - - - -\n");
-    printf("eax: 0x%x\n", a);
-    printf("ebx: 0x%x\n", b);
-    printf("ecx: 0x%x\n", c);
-    printf("edx: 0x%x\n", d);
-    printf("===========================\n");
+    cout << CpuVendor(info.load(0)).getName() << endl;
 }
 
 int process(int argc, char* argv[])
