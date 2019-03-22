@@ -1,5 +1,6 @@
 ﻿#include <algorithm>
 #include <array>
+#include <cmath>
 #include <iostream>
 #include "common.h"
 #include "MosaicFilter.h"
@@ -9,29 +10,6 @@ using namespace ragii::image;
 
 namespace
 {
-    const int SmallBlockSize = 3 * 3;
-    const int LargeBlockSize = 5 * 5;
-
-    // 基準ピクセルからの行オフセット(3x3)
-    constexpr array<int, SmallBlockSize> SmallBlockRowOffsets = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
-
-    // 基準ピクセルからの行オフセット(5x5)
-    constexpr array<int, LargeBlockSize> LargeBlockRowOffsets = { -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0,
-                                                                  0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 };
-
-    // 基準ピクセルからの列オフセット(3x3)
-    constexpr array<int, SmallBlockSize> SmallBlockColOffsetsBGR = { -3, 0, 3, -3, 0, 3, -3, 0, 3 };
-
-    // 基準ピクセルからの列オフセット(3x3)
-    constexpr array<int, SmallBlockSize> SmallBlockColOffsetsBGRA = { -4, 0, 4, -4, 0, 4, -4, 0, 4 };
-
-    // 基準ピクセルからの列オフセット(5x5)
-    constexpr array<int, LargeBlockSize> LargeBlockColOffsetsBGR = { -6, -3, 0, 3, 6, -6, -3, 0, 3, 6, -6, -3, 0,
-                                                                     3, 6, -6, -3, 0, 3, 6, -6, -3, 0, 3, 6 };
-
-    // 基準ピクセルからの列オフセット(5x5)
-    constexpr array<int, LargeBlockSize> LargeBlockColOffsetsBGRA = { -8, -4, 0, 4, 8, -8, -4, 0, 4, 8, -8, -4, 0,
-                                                                      4, 8, -8, -4, 0, 4, 8, -8, -4, 0, 4, 8 };
 
     struct Color
     {
@@ -42,8 +20,11 @@ namespace
 
     Color getColor(const uint8_t* img, int width, int depth, int row, int col)
     {
-        return Color { *(img + (row * width * depth + col + 0)), *(img + (row * width * depth + col + 1)),
-                       *(img + (row * width * depth + col + 2)) };
+        return Color {
+            *(img + (row * width * depth + col + 0)),
+            *(img + (row * width * depth + col + 1)),
+            *(img + (row * width * depth + col + 2))
+        };
     }
 
     void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
@@ -62,45 +43,44 @@ void MosaicFilter::apply()
     int d = m_Params.bitCount / 8;
     uint8_t* img = m_Params.image;
 
-    if (/*d != 3 && */ d != 4) {
+    if (d != 4) {
         cout << "depth " << d << " not supported." << endl;
         return;
     }
 
     int row, col = 0;
-    int i = 0;
     Color tempColor = {};
     Color resultColor = {};
 
-// TODO: 何かで判断して実行時に切り替えたい
-#define USE_SMALL_BLOCK 0
-#if USE_SMALL_BLOCK
-    int blockSize = SmallBlockSize;
-    const auto& rowOffsets = SmallBlockRowOffsets;
-    const auto& colOffsets = d == 3 ? SmallBlockColOffsetsBGR : SmallBlockColOffsetsBGRA;
-#else
-    int blockSize = LargeBlockSize;
-    const auto& rowOffsets = LargeBlockRowOffsets;
-    const auto& colOffsets = d == 3 ? LargeBlockColOffsetsBGR : LargeBlockColOffsetsBGRA;
-#endif
+    const int blockWidth = 20;
+    const int pxPerBlock = blockWidth * blockWidth;
 
-    // TODO: 何も考えずに書いたから全部見直す。
-    for (row = 1; row < h - 1; row++) {
-        for (col = d; col < w * d - d; col += d) {
+    for (row = 0; row < h - blockWidth; row += blockWidth) {
+        for (col = 0; col < w * d; col += (blockWidth * d)) {
             resultColor = {};
 
-            for (i = 0; i < blockSize; i++) {
-                tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
-                resultColor.b += tempColor.b;
-                resultColor.g += tempColor.g;
-                resultColor.r += tempColor.r;
+            for (int block_y = 0; block_y < blockWidth; block_y++) {
+                for (int block_x = 0; block_x < blockWidth; block_x++) {
+                    int rowOffset = block_y;
+                    int colOffset = block_x * d;
+                    tempColor = getColor(img, w, d, row + rowOffset, col + colOffset);
+                    resultColor.b += tempColor.b;
+                    resultColor.g += tempColor.g;
+                    resultColor.r += tempColor.r;
+                }
             }
 
-            resultColor.b = std::clamp(resultColor.b / blockSize, 0x00, 0xff);
-            resultColor.g = std::clamp(resultColor.g / blockSize, 0x00, 0xff);
-            resultColor.r = std::clamp(resultColor.r / blockSize, 0x00, 0xff);
+            resultColor.b = std::clamp(resultColor.b / pxPerBlock, 0x00, 0xff);
+            resultColor.g = std::clamp(resultColor.g / pxPerBlock, 0x00, 0xff);
+            resultColor.r = std::clamp(resultColor.r / pxPerBlock, 0x00, 0xff);
 
-            setColor(img, w, d, row, col, resultColor);
+            for (int block_y = 0; block_y < blockWidth; block_y++) {
+                for (int block_x = 0; block_x < blockWidth; block_x++) {
+                    int rowOffset = block_y;
+                    int colOffset = block_x * d;
+                    setColor(img, w, d, row + rowOffset, col + colOffset, resultColor);
+                }
+            }
         }
     }
 }
