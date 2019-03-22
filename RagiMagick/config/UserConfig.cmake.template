@@ -1,0 +1,3 @@
+if(MSVC)
+    set_target_properties(RagiMagick PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "")
+endif()

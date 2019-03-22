@@ -37,3 +37,9 @@ target_include_directories(RagiMagick PRIVATE "lib")
 #add_dependencies(ragii ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 #add_dependencies(ragii-image ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 #add_dependencies(RagiMagick ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
+
+# user config
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/config/UserConfig.cmake")
+    include(config/UserConfig.cmake)
+    message("UserConfig.cmake loaded.")
+endif()
