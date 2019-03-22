@@ -100,6 +100,26 @@ namespace ragii
             }
         }
 
+        // 文字列型から整数型へ変換
+        template<class T, class C, T Fallback = T(),
+                 typename std::enable_if<std::is_arithmetic_v<T>, std::nullptr_t>::type = nullptr,
+                 typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr>
+        constexpr T str_to_number(const C* s)
+        {
+            T result = T(0);
+            int i = 0;
+            while (true) {
+                C c = *s;
+                if (c == C('\0')) {
+                    break;
+                }
+                result = result | (T(c) << (sizeof(C) * i * 8));
+                ++s;
+                ++i;
+            }
+            return result;
+        }
+
         template<class C, typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr>
         constexpr const C* begin(const C* s)
         {
@@ -164,6 +184,30 @@ namespace ragii
             const bool result = starts_with<C>(base_begin, search);
 
             return result;
+        }
+
+        // 文字列2つが完全に一致するか比較
+        template<class C, typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr>
+        constexpr bool equals(const C* str1, const C* str2)
+        {
+            const C null = C('\0');
+
+            if (*str1 == null || *str2 == null) {
+                return false;
+            }
+
+            if (length(str1) != length(str2)) {
+                return false;
+            }
+
+            while (*str1 != null && *str2 != null) {
+                if (*str1 != *str2) {
+                    return false;
+                }
+                str1++;
+                str2++;
+            }
+            return true;
         }
 
     }  // namespace text

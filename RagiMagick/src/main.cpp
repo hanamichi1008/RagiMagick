@@ -34,8 +34,17 @@ int main(int argc, char* argv[])
 void dumpSystemInfo()
 {
     CpuInfo info;
-
     cout << CpuVendor(info.load(0)).getName() << endl;
+
+    auto reg = info.load(1);
+    CpuAvailableFeatures features(reg);
+    cout << "sse:   " << features.sse() << endl;
+    cout << "sse2:  " << features.sse2() << endl;
+    cout << "sse3:  " << features.sse3() << endl;
+    cout << "sse41: " << features.sse41() << endl;
+    cout << "sse42: " << features.sse42() << endl;
+    cout << "avx:   " << features.avx() << endl;
+    cout << "avx2:  " << features.avx2() << endl;
 }
 
 int process(int argc, char* argv[])
