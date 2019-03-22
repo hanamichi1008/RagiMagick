@@ -67,7 +67,7 @@ namespace
             // ロード (32bit * 8px = 256bit)
             src = _mm256_load_si256(reinterpret_cast<__m256i*>(img));
             // BGR各成分で閾値を超えているかチェック TODO: Aが0前提なのを直す
-            dst = _mm256_cmpgt_epi8(src, th1);
+            dst = _mm256_cmpgt_epi8(src, th1);  // TODO: AVX2からだった。自宅の Sandy では Illegal instruction。直す。
             // BGRA 全てが 0 なら 0x00000000、そうでなければ 0xffffffff になる
             dst = _mm256_cmpgt_epi32(dst, th2);
             _mm256_store_si256(reinterpret_cast<__m256i*>(img), dst);
@@ -85,7 +85,7 @@ void BinaryFilter::apply()
     uint8_t* img = m_Params.image;
 
     // TODO: ちゃんとする
-    int mode = 2;
+    int mode = 0;
     switch (mode) {
         case 0:
             binary_normal(img, w, h, d);

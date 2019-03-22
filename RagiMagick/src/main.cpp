@@ -178,6 +178,10 @@ int convert(vector<CommandOption>& opts)
     else if (filter == "mosaic") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Mosaic);
     }
+    else {
+        cout << "未知のコマンドが指定されています！" << endl;
+        return EXIT_FAILURE;
+    }
 
     bmp->save(out_file->value.data());
     cout << "converted." << endl;
