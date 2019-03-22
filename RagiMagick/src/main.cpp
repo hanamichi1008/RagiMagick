@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-
+#include <libjpeg-turbo/jpeglib.h>
 #include "ragii/include/text/text.h"
 #include "ragii/include/hardware/cpu_info.h"
 #include "ragii-image/include/Bitmap.h"
@@ -119,8 +119,8 @@ int convert(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    if (!ends_with(in_file->value.data(), ".bmp")) {
-        cout << ".bmp 以外は非対応です。" << endl;
+    if (!ends_with(in_file->value.data(), ".bmp") && !ends_with(in_file->value.data(), ".jpg")) {
+        cout << ".bmp と .jpg 以外は非対応です。" << endl;
         return EXIT_FAILURE;
     }
 
