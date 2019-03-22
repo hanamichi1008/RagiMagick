@@ -5,7 +5,7 @@
 
 #include "ragii-image/include/Bitmap.h"
 #include "ragii-image/include/BitmapConverter.h"
-#include "ragii/text/text.h"
+#include "ragii/include/text/text.h"
 
 using namespace std;
 using namespace ragii::image;
