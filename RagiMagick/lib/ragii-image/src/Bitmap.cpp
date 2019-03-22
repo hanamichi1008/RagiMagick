@@ -1,8 +1,7 @@
-﻿#include "Bitmap.h"
-
-#include <string.h>
-#include <fstream>
+﻿#include <fstream>
 #include <iostream>
+#include <string.h>
+#include "Bitmap.h"
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
 
@@ -30,8 +29,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     fs.seekg(0, ios::beg);
     fs.read(reinterpret_cast<char*>(&bmp->m_Header.File), BitmapFileHeaderSize);
 
-    if (!((bmp->m_Header.File.Type & 0xff) == 'B') &&
-        (bmp->m_Header.File.Type >> 8) == 'M') {
+    if (!((bmp->m_Header.File.Type & 0xff) == 'B') && (bmp->m_Header.File.Type >> 8) == 'M') {
         cout << "invalid bitmap file header." << endl;
         return nullptr;
     }
@@ -48,8 +46,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     fs.seekg(-streamoff(sizeof(uint32_t)), ios::cur);
 
     if (infoSize == BitmapInfoHeaderSize) {
-        fs.read(reinterpret_cast<char*>(&bmp->m_Header.Info),
-                BitmapInfoHeaderSize);
+        fs.read(reinterpret_cast<char*>(&bmp->m_Header.Info), BitmapInfoHeaderSize);
     }
 
     remain -= infoSize;
@@ -59,8 +56,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
         return bmp;
     }
 
-    uint32_t dataSize = static_cast<uint32_t>(
-        fileSize - static_cast<streampos>(bmp->m_Header.File.OffBits));
+    uint32_t dataSize = static_cast<uint32_t>(fileSize - static_cast<streampos>(bmp->m_Header.File.OffBits));
     bmp->m_Data = make_unique<uint8_t[]>(dataSize);
 
     fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), dataSize);
@@ -69,8 +65,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     return bmp;
 }
 
-unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height,
-                                  int16_t bitCount)
+unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCount)
 {
     auto bmp = make_unique<Bitmap>();
 
@@ -103,8 +98,7 @@ void Bitmap::save(string path)
     ofstream fs(path, ios::out | ios::binary);
     fs.write(reinterpret_cast<char*>(&m_Header.File), BitmapFileHeaderSize);
     fs.write(reinterpret_cast<char*>(&m_Header.Info), BitmapInfoHeaderSize);
-    fs.write(reinterpret_cast<char*>(m_Data.get()),
-             info.Width * info.Height * info.BitCount / 8);
+    fs.write(reinterpret_cast<char*>(m_Data.get()), info.Width * info.Height * info.BitCount / 8);
     fs.flush();
     fs.close();
 }

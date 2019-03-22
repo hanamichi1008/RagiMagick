@@ -1,16 +1,16 @@
 ﻿#include <array>
-#include "GrayscaleFilter.h"
 #include <iostream>
 #include "common.h"
+#include "GrayscaleFilter.h"
 
 using namespace std;
 using namespace ragii::image;
 
 namespace
 {
-constexpr float WEIGHT_B = 0.298912f;
-constexpr float WEIGHT_G = 0.586611f;
-constexpr float WEIGHT_R = 0.114478f;
+    constexpr float WEIGHT_B = 0.298912f;
+    constexpr float WEIGHT_G = 0.586611f;
+    constexpr float WEIGHT_R = 0.114478f;
 }  // namespace
 
 void GrayscaleFilter::apply()
@@ -31,14 +31,10 @@ void GrayscaleFilter::apply()
     __m128 weight_r = _mm_set_ps1(WEIGHT_R);
 
     // 配置先
-    __m128i mapping_b = _mm_setr_epi8(0, -1, -1, -1, 4, -1, -1, -1, 8, -1, -1,
-                                      -1, 12, -1, -1, -1);
-    __m128i mapping_g = _mm_setr_epi8(1, -1, -1, -1, 5, -1, -1, -1, 9, -1, -1,
-                                      -1, 13, -1, -1, -1);
-    __m128i mapping_r = _mm_setr_epi8(2, -1, -1, -1, 6, -1, -1, -1, 10, -1, -1,
-                                      -1, 14, -1, -1, -1);
-    __m128i mapping_result =
-        _mm_setr_epi8(0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1);
+    __m128i mapping_b = _mm_setr_epi8(0, -1, -1, -1, 4, -1, -1, -1, 8, -1, -1, -1, 12, -1, -1, -1);
+    __m128i mapping_g = _mm_setr_epi8(1, -1, -1, -1, 5, -1, -1, -1, 9, -1, -1, -1, 13, -1, -1, -1);
+    __m128i mapping_r = _mm_setr_epi8(2, -1, -1, -1, 6, -1, -1, -1, 10, -1, -1, -1, 14, -1, -1, -1);
+    __m128i mapping_result = _mm_setr_epi8(0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1);
 
     __m128i src;
     __m128i shuffle_b, shuffle_g, shuffle_r, shuffle_result;

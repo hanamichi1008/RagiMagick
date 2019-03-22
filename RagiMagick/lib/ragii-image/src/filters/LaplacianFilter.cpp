@@ -1,33 +1,32 @@
-﻿#include <memory>
-#include "LaplacianFilter.h"
-#include <algorithm>
+﻿#include <algorithm>
 #include <iostream>
+#include <memory>
+#include "LaplacianFilter.h"
 
 using namespace std;
 using namespace ragii::image;
 
 namespace
 {
-struct Color {
-    int b;
-    int g;
-    int r;
-};
+    struct Color
+    {
+        int b;
+        int g;
+        int r;
+    };
 
-Color getColor(const uint8_t* img, int width, int depth, int row, int col)
-{
-    return Color{*(img + (row * width * depth + col + 0)),
-                 *(img + (row * width * depth + col + 1)),
-                 *(img + (row * width * depth + col + 2))};
-}
+    Color getColor(const uint8_t* img, int width, int depth, int row, int col)
+    {
+        return Color { *(img + (row * width * depth + col + 0)), *(img + (row * width * depth + col + 1)),
+                       *(img + (row * width * depth + col + 2)) };
+    }
 
-void setColor(uint8_t* img, int width, int depth, int row, int col,
-              const Color& color)
-{
-    *(img + (row * width * depth + col + 0)) = static_cast<uint8_t>(color.b);
-    *(img + (row * width * depth + col + 1)) = static_cast<uint8_t>(color.g);
-    *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
-}
+    void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
+    {
+        *(img + (row * width * depth + col + 0)) = static_cast<uint8_t>(color.b);
+        *(img + (row * width * depth + col + 1)) = static_cast<uint8_t>(color.g);
+        *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
+    }
 
 }  // namespace
 
@@ -44,16 +43,16 @@ void LaplacianFilter::apply()
     }
 
     // 係数
-    int coef[] = {-1, -1, -1, -1, 8, -1, -1, -1, -1};
+    int coef[] = { -1, -1, -1, -1, 8, -1, -1, -1, -1 };
     // 原画像(デバッグ時確認用)
     // int coef[] = { 0, 0, 0, 0, 1, 0, 0, 0, 0 };
 
     // 基準ピクセルからの行オフセット
-    int rowOffsets[] = {-1, -1, -1, 0, 0, 0, 1, 1, 1};
+    int rowOffsets[] = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
     // 基準ピクセルからの列オフセット
-    int bgrColOffsets[] = {-3, 0, 3, -3, 0, 3, -3, 0, 3};
+    int bgrColOffsets[] = { -3, 0, 3, -3, 0, 3, -3, 0, 3 };
     // 基準ピクセルからの列オフセット
-    int bgraColOffsets[] = {-4, 0, 4, -4, 0, 4, -4, 0, 4};
+    int bgraColOffsets[] = { -4, 0, 4, -4, 0, 4, -4, 0, 4 };
 
     const int* colOffsets = d == 3 ? bgrColOffsets : bgraColOffsets;
 
@@ -67,8 +66,7 @@ void LaplacianFilter::apply()
             resultColor = {};
 
             for (i = 0; i < 9; i++) {
-                tempColor = getColor(img, w, d, row + rowOffsets[i],
-                                     col + colOffsets[i]);
+                tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
                 resultColor.b += (tempColor.b * coef[i]);
                 resultColor.g += (tempColor.g * coef[i]);
                 resultColor.r += (tempColor.r * coef[i]);

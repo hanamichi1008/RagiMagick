@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+
 #include "ragii-image/include/Bitmap.h"
 #include "ragii-image/include/BitmapConverter.h"
 #include "ragii/text/text.h"
@@ -10,7 +11,8 @@ using namespace std;
 using namespace ragii::image;
 using namespace ragii::text;
 
-struct CommandOption {
+struct CommandOption
+{
     string_view name;
     string_view value;
 };
@@ -32,9 +34,9 @@ void dumpSystemInfo()
     uint32_t a, b, c, d = 0;
 
 #ifdef _MSC_VER
-#ifdef _M_X64
-#error 非対応アーキテクチャ！
-#endif
+#    ifdef _M_X64
+#        error 非対応アーキテクチャ！
+#    endif
     __asm
     {
         mov eax, 0
@@ -80,10 +82,11 @@ int process(int argc, char* argv[])
         auto opt = string_view(argv[i]);
         if (opt[0] == '-') {
             auto value = i + 1 < argc ? argv[i + 1] : "";
-            opts.emplace_back(CommandOption{argv[i], value});
+            opts.emplace_back(CommandOption { argv[i], value });
             i += 2;
-        } else {
-            opts.emplace_back(CommandOption{argv[i], ""});
+        }
+        else {
+            opts.emplace_back(CommandOption { argv[i], "" });
             i++;
         }
     }
@@ -114,13 +117,11 @@ int process(int argc, char* argv[])
 int convert(vector<CommandOption>& opts)
 {
     if (opts.empty()) {
-        cout << "変換方法を指定してください。 negative, grayscale, etc."
-             << endl;
+        cout << "変換方法を指定してください。 negative, grayscale, etc." << endl;
         return EXIT_FAILURE;
     }
 
-    auto in_file = find_if(opts.begin(), opts.end(),
-                           [&](auto i) { return i.name == "-i"; });
+    auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-i"; });
     if (in_file == opts.end()) {
         cout << "入力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
@@ -130,8 +131,7 @@ int convert(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    auto out_file = find_if(opts.begin(), opts.end(),
-                            [&](auto i) { return i.name == "-o"; });
+    auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
     if (out_file == opts.end()) {
         cout << "出力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
@@ -153,24 +153,29 @@ int convert(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    cout << "width: " << bmp->getWidth() << ", height: " << bmp->getHeight()
-         << ", depth: " << bmp->getBitCount() / 8 << endl;
+    cout << "width: " << bmp->getWidth() << ", height: " << bmp->getHeight() << ", depth: " << bmp->getBitCount() / 8
+         << endl;
 
     auto filter = opts[0].name;
 
     if (filter == "negative") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
-    } else if (filter == "binary") {
+    }
+    else if (filter == "binary") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
-    } else if (filter == "grayscale") {
+    }
+    else if (filter == "grayscale") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
-    } else if (filter == "laplacian") {
+    }
+    else if (filter == "laplacian") {
         // BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
         BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
         BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
-    } else if (filter == "gaussian") {
+    }
+    else if (filter == "gaussian") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Gaussian);
-    } else if (filter == "mosaic") {
+    }
+    else if (filter == "mosaic") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Mosaic);
     }
 
@@ -188,8 +193,7 @@ int create(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    auto out_file = find_if(opts.begin(), opts.end(),
-                            [&](auto i) { return i.name == "-o"; });
+    auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
     if (out_file == opts.end()) {
         cout << "出力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
@@ -199,8 +203,7 @@ int create(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    auto w = find_if(opts.begin(), opts.end(),
-                     [&](auto i) { return i.name == "-w"; });
+    auto w = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-w"; });
     if (w == opts.end()) {
         cout << "-w (幅) を指定してください。" << endl;
         return EXIT_FAILURE;
@@ -210,8 +213,7 @@ int create(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    auto h = find_if(opts.begin(), opts.end(),
-                     [&](auto i) { return i.name == "-h"; });
+    auto h = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-h"; });
     if (h == opts.end()) {
         cout << "-h (高さ) を指定してください。" << endl;
         return EXIT_FAILURE;
@@ -221,11 +223,9 @@ int create(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    auto d = find_if(opts.begin(), opts.end(),
-                     [&](auto i) { return i.name == "-d"; });
+    auto d = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-d"; });
     if (d == opts.end()) {
-        cout << "-d (ビット深度 3: 24bit, 4: 32bit) を指定してください。"
-             << endl;
+        cout << "-d (ビット深度 3: 24bit, 4: 32bit) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
     if (d->value.empty()) {
@@ -237,15 +237,13 @@ int create(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    auto p = find_if(opts.begin(), opts.end(),
-                     [&](auto i) { return i.name == "-p"; });
+    auto p = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-p"; });
     if (p == opts.end()) {
         cout << "-p (パターン) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    auto bmp = Bitmap::create(str_to_arithmetic<int32_t>(w->value.data()),
-                              str_to_arithmetic<int32_t>(h->value.data()),
+    auto bmp = Bitmap::create(str_to_arithmetic<int32_t>(w->value.data()), str_to_arithmetic<int32_t>(h->value.data()),
                               str_to_arithmetic<int16_t>(d->value.data()) * 8);
 
     if (p->value == "checkered") {

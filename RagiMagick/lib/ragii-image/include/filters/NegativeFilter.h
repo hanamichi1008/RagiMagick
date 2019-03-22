@@ -4,13 +4,13 @@
 
 namespace ragii
 {
-namespace image
-{
-class NegativeFilter : public IImageFilter
-{
-public:
-    void apply() override;
-};
+    namespace image
+    {
+        class NegativeFilter : public IImageFilter
+        {
+        public:
+            void apply() override;
+        };
 
-}  // namespace image
+    }  // namespace image
 }  // namespace ragii

@@ -2,16 +2,17 @@
 
 namespace ragii
 {
-namespace image
-{
-enum class FilterType {
-    Binary,
-    Grayscale,
-    Negative,
-    Laplacian,
-    Gaussian,
-    Mosaic,
-};
+    namespace image
+    {
+        enum class FilterType
+        {
+            Binary,
+            Grayscale,
+            Negative,
+            Laplacian,
+            Gaussian,
+            Mosaic,
+        };
 
-}  // namespace image
+    }  // namespace image
 }  // namespace ragii

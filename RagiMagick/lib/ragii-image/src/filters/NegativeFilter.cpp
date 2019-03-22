@@ -1,6 +1,6 @@
 ﻿#include <iostream>
-#include "NegativeFilter.h"
 #include "common.h"
+#include "NegativeFilter.h"
 
 using namespace std;
 using namespace ragii::image;

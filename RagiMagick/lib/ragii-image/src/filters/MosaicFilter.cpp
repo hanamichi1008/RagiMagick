@@ -1,64 +1,57 @@
-﻿#include <array>
-#include "MosaicFilter.h"
-#include <algorithm>
+﻿#include <algorithm>
+#include <array>
 #include <iostream>
 #include "common.h"
+#include "MosaicFilter.h"
 
 using namespace std;
 using namespace ragii::image;
 
 namespace
 {
-const int SmallBlockSize = 3 * 3;
-const int LargeBlockSize = 5 * 5;
+    const int SmallBlockSize = 3 * 3;
+    const int LargeBlockSize = 5 * 5;
 
-// 基準ピクセルからの行オフセット(3x3)
-constexpr array<int, SmallBlockSize> SmallBlockRowOffsets = {-1, -1, -1, 0, 0,
-                                                             0,  1,  1,  1};
+    // 基準ピクセルからの行オフセット(3x3)
+    constexpr array<int, SmallBlockSize> SmallBlockRowOffsets = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
 
-// 基準ピクセルからの行オフセット(5x5)
-constexpr array<int, LargeBlockSize> LargeBlockRowOffsets = {
-    -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0,
-    0,  0,  1,  1,  1,  1,  1,  2,  2,  2,  2, 2};
+    // 基準ピクセルからの行オフセット(5x5)
+    constexpr array<int, LargeBlockSize> LargeBlockRowOffsets = { -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 0, 0, 0,
+                                                                  0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2 };
 
-// 基準ピクセルからの列オフセット(3x3)
-constexpr array<int, SmallBlockSize> SmallBlockColOffsetsBGR = {
-    -3, 0, 3, -3, 0, 3, -3, 0, 3};
+    // 基準ピクセルからの列オフセット(3x3)
+    constexpr array<int, SmallBlockSize> SmallBlockColOffsetsBGR = { -3, 0, 3, -3, 0, 3, -3, 0, 3 };
 
-// 基準ピクセルからの列オフセット(3x3)
-constexpr array<int, SmallBlockSize> SmallBlockColOffsetsBGRA = {
-    -4, 0, 4, -4, 0, 4, -4, 0, 4};
+    // 基準ピクセルからの列オフセット(3x3)
+    constexpr array<int, SmallBlockSize> SmallBlockColOffsetsBGRA = { -4, 0, 4, -4, 0, 4, -4, 0, 4 };
 
-// 基準ピクセルからの列オフセット(5x5)
-constexpr array<int, LargeBlockSize> LargeBlockColOffsetsBGR = {
-    -6, -3, 0,  3,  6, -6, -3, 0,  3,  6, -6, -3, 0,
-    3,  6,  -6, -3, 0, 3,  6,  -6, -3, 0, 3,  6};
+    // 基準ピクセルからの列オフセット(5x5)
+    constexpr array<int, LargeBlockSize> LargeBlockColOffsetsBGR = { -6, -3, 0, 3, 6, -6, -3, 0, 3, 6, -6, -3, 0,
+                                                                     3, 6, -6, -3, 0, 3, 6, -6, -3, 0, 3, 6 };
 
-// 基準ピクセルからの列オフセット(5x5)
-constexpr array<int, LargeBlockSize> LargeBlockColOffsetsBGRA = {
-    -8, -4, 0,  4,  8, -8, -4, 0,  4,  8, -8, -4, 0,
-    4,  8,  -8, -4, 0, 4,  8,  -8, -4, 0, 4,  8};
+    // 基準ピクセルからの列オフセット(5x5)
+    constexpr array<int, LargeBlockSize> LargeBlockColOffsetsBGRA = { -8, -4, 0, 4, 8, -8, -4, 0, 4, 8, -8, -4, 0,
+                                                                      4, 8, -8, -4, 0, 4, 8, -8, -4, 0, 4, 8 };
 
-struct Color {
-    int b;
-    int g;
-    int r;
-};
+    struct Color
+    {
+        int b;
+        int g;
+        int r;
+    };
 
-Color getColor(const uint8_t* img, int width, int depth, int row, int col)
-{
-    return Color{*(img + (row * width * depth + col + 0)),
-                 *(img + (row * width * depth + col + 1)),
-                 *(img + (row * width * depth + col + 2))};
-}
+    Color getColor(const uint8_t* img, int width, int depth, int row, int col)
+    {
+        return Color { *(img + (row * width * depth + col + 0)), *(img + (row * width * depth + col + 1)),
+                       *(img + (row * width * depth + col + 2)) };
+    }
 
-void setColor(uint8_t* img, int width, int depth, int row, int col,
-              const Color& color)
-{
-    *(img + (row * width * depth + col + 0)) = static_cast<uint8_t>(color.b);
-    *(img + (row * width * depth + col + 1)) = static_cast<uint8_t>(color.g);
-    *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
-}
+    void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
+    {
+        *(img + (row * width * depth + col + 0)) = static_cast<uint8_t>(color.b);
+        *(img + (row * width * depth + col + 1)) = static_cast<uint8_t>(color.g);
+        *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
+    }
 
 }  // namespace
 
@@ -84,13 +77,11 @@ void MosaicFilter::apply()
 #if USE_SMALL_BLOCK
     int blockSize = SmallBlockSize;
     const auto& rowOffsets = SmallBlockRowOffsets;
-    const auto& colOffsets =
-        d == 3 ? SmallBlockColOffsetsBGR : SmallBlockColOffsetsBGRA;
+    const auto& colOffsets = d == 3 ? SmallBlockColOffsetsBGR : SmallBlockColOffsetsBGRA;
 #else
     int blockSize = LargeBlockSize;
     const auto& rowOffsets = LargeBlockRowOffsets;
-    const auto& colOffsets =
-        d == 3 ? LargeBlockColOffsetsBGR : LargeBlockColOffsetsBGRA;
+    const auto& colOffsets = d == 3 ? LargeBlockColOffsetsBGR : LargeBlockColOffsetsBGRA;
 #endif
 
     // TODO: 何も考えずに書いたから全部見直す。
@@ -99,8 +90,7 @@ void MosaicFilter::apply()
             resultColor = {};
 
             for (i = 0; i < blockSize; i++) {
-                tempColor = getColor(img, w, d, row + rowOffsets[i],
-                                     col + colOffsets[i]);
+                tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
                 resultColor.b += tempColor.b;
                 resultColor.g += tempColor.g;
                 resultColor.r += tempColor.r;
