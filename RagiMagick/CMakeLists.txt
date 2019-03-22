@@ -14,7 +14,7 @@ set(RAGIMAGICK_CODE_FORMAT_TARGET_NAME "${CMAKE_PROJECT_NAME}_code-format")
 format_code(${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 
 if (MSVC)
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4)
     set_property(DIRECTORY ${CMAKE_CURRENT_LIST_DIR} PROPERTY VS_STARTUP_PROJECT "${CMAKE_PROJECT_NAME}")
 elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU|AppleClang)
     add_compile_options(-Wall -Wextra -pedantic -Werror)
@@ -22,10 +22,12 @@ endif()
 
 source_group("Sources" FILES src/main.cpp)
 
+add_subdirectory(lib/libjpeg-turbo EXCLUDE_FROM_ALL)
 add_subdirectory(lib/ragii)
 add_subdirectory(lib/ragii-image)
 
 add_executable(RagiMagick src/main.cpp)
+target_link_libraries(RagiMagick jpeg-static)
 target_link_libraries(RagiMagick ragii)
 target_link_libraries(RagiMagick ragii-image)
 

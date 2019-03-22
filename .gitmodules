@@ -1,0 +1,3 @@
+[submodule "RagiMagick/lib/libjpeg-turbo"]
+	path = RagiMagick/lib/libjpeg-turbo
+	url = git@github.com:libjpeg-turbo/libjpeg-turbo.git
