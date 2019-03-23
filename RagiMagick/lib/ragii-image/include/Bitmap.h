@@ -9,9 +9,36 @@ namespace ragii
 {
     namespace image
     {
+        template<typename T>
+        struct aligned_deleter
+        {
+            void operator()(T* ptr)
+            {
+                if (ptr) {
+                    _aligned_free(ptr);
+                    ptr = nullptr;
+                }
+            }
+        };
+
+        template<typename T>
+        struct aligned_allocator
+        {
+            static T* alloc(size_t size, int alignment)
+            {
+                return reinterpret_cast<T*>(_aligned_malloc(size, alignment));
+            }
+
+            static decltype(auto) make_unique(size_t size, int alignment)
+            {
+                return std::unique_ptr<T, aligned_deleter<T>>(alloc(size, alignment));
+            }
+        };
+
         class Bitmap
         {
         public:
+            ~Bitmap();
             static std::unique_ptr<Bitmap> loadFromFile(std::string path);
             static std::unique_ptr<Bitmap> create(int32_t width, int32_t height, int16_t bitCount = 24);
 
@@ -19,8 +46,8 @@ namespace ragii
 
             const BitmapHeader& getHeader() const;
 
-            std::unique_ptr<uint8_t[]>& getData();
-            const std::unique_ptr<uint8_t[]>& getData() const;
+            decltype(auto) getData() { return m_Data; }
+            decltype(auto) getData() const { return m_Data; };
 
             int32_t getWidth() const;
             int32_t getHeight() const;
@@ -28,7 +55,7 @@ namespace ragii
 
         private:
             BitmapHeader m_Header = {};
-            std::unique_ptr<uint8_t[]> m_Data;
+            uint8_t* m_Data = nullptr;
         };
 
     }  // namespace image
