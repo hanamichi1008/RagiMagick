@@ -1,3 +1,6 @@
 [submodule "RagiMagick/lib/libjpeg-turbo"]
 	path = RagiMagick/lib/libjpeg-turbo
 	url = git@github.com:libjpeg-turbo/libjpeg-turbo.git
+[submodule "RagiMagick/lib/libpng"]
+	path = RagiMagick/lib/libpng
+	url = git@github.com:glennrp/libpng.git
