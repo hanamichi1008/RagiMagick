@@ -127,8 +127,11 @@ int convert(vector<CommandOption>& opts)
     else if (ends_with(in_file->value.data(), ".jpg")) {
         bmp = jpeg_to_bmp(in_file->value.data());
     }
+    else if (ends_with(in_file->value.data(), ".png")) {
+        bmp = png_to_bmp(in_file->value.data());
+    }
     else {
-        cout << ".bmp と .jpg 以外は非対応です。" << endl;
+        cout << ".bmp, .jpg, .png 以外は非対応です。" << endl;
         return EXIT_FAILURE;
     }
 

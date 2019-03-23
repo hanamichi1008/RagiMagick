@@ -2,6 +2,7 @@
 // https://github.com/libjpeg-turbo/libjpeg-turbo/issues/17
 #include <stdio.h>
 #include <jpeglib.h>
+#include <png.h>
 #include "Bitmap.h"
 #include "util.h"
 
@@ -52,6 +53,46 @@ namespace ragii::image
 
         jpeg_finish_decompress(&decompress_info);
         jpeg_destroy_decompress(&decompress_info);
+
+        return bmp;
+    }
+
+    unique_ptr<Bitmap> png_to_bmp(string path)
+    {
+        int ret = 0;
+
+        png_image image;
+        memset(&image, 0, sizeof(png_image));
+        image.version = PNG_IMAGE_VERSION;
+
+        ret = png_image_begin_read_from_file(&image, path.c_str());
+        if (ret == 0) {
+            return nullptr;
+        }
+        if (PNG_IMAGE_FAILED(image)) {
+            return nullptr;
+        }
+
+        size_t components = PNG_IMAGE_PIXEL_CHANNELS(image.format);
+
+        auto bmp =
+            Bitmap::create(
+                image.width,
+                image.height,
+                static_cast<int16_t>(components * 8));
+
+        if (!bmp) {
+            return nullptr;
+        }
+
+        auto stride = PNG_IMAGE_ROW_STRIDE(image);
+
+        ret = png_image_finish_read(&image, nullptr, bmp->getData(), stride, nullptr);
+        if (ret == 0) {
+            return nullptr;
+        }
+
+        png_image_free(&image);
 
         return bmp;
     }
