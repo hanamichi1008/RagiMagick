@@ -41,3 +41,5 @@ add_library(ragii-image STATIC
 target_include_directories(ragii-image PUBLIC "include")
 target_include_directories(ragii-image PUBLIC "include/filters")
 target_include_directories(ragii-image PUBLIC "include/formats")
+target_include_directories(ragii-image PRIVATE "../libjpeg-turbo")
+target_include_directories(ragii-image PRIVATE "${CMAKE_BINARY_DIR}/lib/libjpeg-turbo")

@@ -1,12 +1,21 @@
 ﻿#include <fstream>
 #include <iostream>
 #include <string.h>
+#include <stdlib.h>
 #include "Bitmap.h"
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
 
 using namespace ragii::image;
 using namespace std;
+
+Bitmap::~Bitmap()
+{
+    if (m_Data) {
+        aligned_deleter<uint8_t>()(m_Data);
+        m_Data = nullptr;
+    }
+}
 
 unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 {
@@ -57,9 +66,9 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     }
 
     uint32_t dataSize = static_cast<uint32_t>(fileSize - static_cast<streampos>(bmp->m_Header.File.OffBits));
-    bmp->m_Data = make_unique<uint8_t[]>(dataSize);
+    bmp->m_Data = aligned_allocator<uint8_t>::alloc(bmp->m_Header.Info.SizeImage, 16);
 
-    fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), dataSize);
+    fs.read(reinterpret_cast<char*>(bmp->m_Data), dataSize);
     fs.close();
 
     return bmp;
@@ -86,7 +95,7 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
     info.SizeImage = width * height * bitCount / 8;
     memcpy(&bmp->m_Header.Info, &info, BitmapInfoHeaderSize);
 
-    bmp->m_Data = make_unique<uint8_t[]>(bmp->m_Header.Info.SizeImage);
+    bmp->m_Data = aligned_allocator<uint8_t>::alloc(bmp->m_Header.Info.SizeImage, 16);
 
     return bmp;
 }
@@ -98,16 +107,12 @@ void Bitmap::save(string path)
     ofstream fs(path, ios::out | ios::binary);
     fs.write(reinterpret_cast<char*>(&m_Header.File), BitmapFileHeaderSize);
     fs.write(reinterpret_cast<char*>(&m_Header.Info), BitmapInfoHeaderSize);
-    fs.write(reinterpret_cast<char*>(m_Data.get()), info.Width * info.Height * info.BitCount / 8);
+    fs.write(reinterpret_cast<char*>(m_Data), info.Width * info.Height * info.BitCount / 8);
     fs.flush();
     fs.close();
 }
 
 const BitmapHeader& Bitmap::getHeader() const { return m_Header; }
-
-unique_ptr<uint8_t[]>& Bitmap::getData() { return m_Data; }
-
-const unique_ptr<uint8_t[]>& Bitmap::getData() const { return m_Data; }
 
 int32_t Bitmap::getWidth() const { return m_Header.Info.Width; }
 
