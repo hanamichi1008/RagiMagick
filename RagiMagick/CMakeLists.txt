@@ -55,7 +55,7 @@ add_executable(RagiMagick src/main.cpp)
 target_link_libraries(RagiMagick
     jpeg-static
     png_static
-    zlib
+    zlibstatic
     ragii
     ragii-image
 )
@@ -67,7 +67,7 @@ target_include_directories(RagiMagick PRIVATE "${CMAKE_BINARY_DIR}/lib/libpng")
 # 依存関係を設定
 # コードフォーマットが最初に実行されるよう、各ターゲットが RAGIMAGICK_CODE_FORMAT_TARGET_NAME に依存するよう設定している
 # ※ ビルド済みでも毎回フォーマットが実行されてしまった。ファイル数が少なくても待ち時間が気になるから無効化しておく。
-add_dependencies(png_static zlib)
+add_dependencies(png_static zlibstatic)
 #add_dependencies(ragii ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 #add_dependencies(ragii-image ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 #add_dependencies(RagiMagick ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
