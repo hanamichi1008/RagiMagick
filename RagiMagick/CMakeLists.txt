@@ -77,3 +77,6 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/config/UserConfig.cmake")
     include(config/UserConfig.cmake)
     message("UserConfig.cmake loaded.")
 endif()
+
+# zlib 後始末
+file(RENAME "./lib/zlib/zconf.h.included" "./lib/zlib/zconf.h")
