@@ -5,8 +5,8 @@ project(ragii CXX)
 if (MSVC)
     add_compile_options(/W4 /WX)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU|AppleClang)
-    # add_compile_options(-Wall -Wextra -pedantic -Werror -Wunused-function)
     add_compile_options(-Wall -Wextra -pedantic)
+    add_compile_options(-Wno-unused-function -Wno-unused-parameter -Wno-padded -Wno-sign-conversion -Wno-sign-compare)
 endif()
 
 
