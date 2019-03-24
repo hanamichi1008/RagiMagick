@@ -37,11 +37,6 @@ namespace ragii
         {
             return std::unique_ptr<T, aligned_deleter<T>>(aligned_alloc<T>(size, alignment));
         }
-
-        static decltype(auto) make_shared(size_t size, int alignment)
-        {
-            return std::shared_ptr<T, aligned_deleter<T>>(aligned_alloc<T>(size, alignment));
-        }
     };
 
 }  // namespace ragii
