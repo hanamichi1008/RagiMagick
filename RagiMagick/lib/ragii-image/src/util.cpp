@@ -12,14 +12,10 @@ namespace ragii::image
 {
     unique_ptr<Bitmap> jpeg_to_bmp(string path)
     {
-        FILE* fp = nullptr;
-
-        auto err = fopen_s(&fp, path.c_str(), "rb");
-        if (err != 0) {
+        unique_ptr<FILE, decltype(&fclose)> fp(fopen(path.c_str(), "rb"), fclose);
+        if (!fp) {
             return nullptr;
         }
-
-        unique_ptr<FILE, decltype(&fclose)> managed_fp(fp, fclose);
 
         jpeg_error_mgr err_mgr = {};
         jpeg_decompress_struct decompress_info = {};
@@ -28,7 +24,7 @@ namespace ragii::image
         decompress_info.do_block_smoothing = FALSE;
         decompress_info.do_fancy_upsampling = FALSE;
 
-        jpeg_stdio_src(&decompress_info, fp);
+        jpeg_stdio_src(&decompress_info, fp.get());
         jpeg_read_header(&decompress_info, TRUE);
         jpeg_start_decompress(&decompress_info);
 
