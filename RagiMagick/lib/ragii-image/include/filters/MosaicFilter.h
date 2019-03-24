@@ -9,6 +9,7 @@ namespace ragii
         class MosaicFilter : public IImageFilter
         {
         public:
+            virtual ~MosaicFilter() override {}
             void apply() override;
         };
 

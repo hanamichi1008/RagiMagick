@@ -71,19 +71,19 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
 
     BitmapFileHeader file = {};
     file = {};
-    file.Size = BitmapHeaderSize + width * height * bitCount / 8;
+    file.Size = BitmapHeaderSize + static_cast<uint32_t>(width * height * bitCount / 8);
     file.Type = 'B' | ('M' << 8);
     file.OffBits = BitmapHeaderSize;
     memcpy(&bmp->m_Header.File, &file, BitmapFileHeaderSize);
 
     BitmapInfoHeader info = {};
     info.Size = BitmapInfoHeaderSize;
-    info.BitCount = bitCount;
+    info.BitCount = static_cast<uint16_t>(bitCount);
     info.Width = width;
     info.Height = height;
     info.Planes = 1;
     info.Compression = BI_RGB;
-    info.SizeImage = width * height * bitCount / 8;
+    info.SizeImage = static_cast<uint32_t>(width * height * bitCount / 8);
     memcpy(&bmp->m_Header.Info, &info, BitmapInfoHeaderSize);
 
     bmp->m_Data = aligned_allocator<uint8_t>::make_unique(bmp->m_Header.Info.SizeImage, 16);
@@ -109,4 +109,4 @@ int32_t Bitmap::getWidth() const { return m_Header.Info.Width; }
 
 int32_t Bitmap::getHeight() const { return m_Header.Info.Height; }
 
-int16_t Bitmap::getBitCount() const { return m_Header.Info.BitCount; }
+uint16_t Bitmap::getBitCount() const { return m_Header.Info.BitCount; }

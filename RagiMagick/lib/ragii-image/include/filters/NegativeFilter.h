@@ -9,6 +9,7 @@ namespace ragii
         class NegativeFilter : public IImageFilter
         {
         public:
+            virtual ~NegativeFilter() override {}
             void apply() override;
         };
 

@@ -1,6 +1,7 @@
 ﻿// libjpeg 使用前に stdio.h が必須
 // https://github.com/libjpeg-turbo/libjpeg-turbo/issues/17
 #include <stdio.h>
+#include <string.h>
 #include <jpeglib.h>
 #include <png.h>
 #include "Bitmap.h"
@@ -30,8 +31,8 @@ namespace ragii::image
 
         auto bmp =
             Bitmap::create(
-                decompress_info.output_width,
-                decompress_info.output_height,
+                static_cast<int32_t>(decompress_info.output_width),
+                static_cast<int32_t>(decompress_info.output_height),
                 static_cast<int16_t>(decompress_info.output_components * 8));
 
         if (!bmp) {
@@ -40,7 +41,7 @@ namespace ragii::image
 
         auto img = bmp->getData();
         size_t lines = 0;
-        size_t stride = decompress_info.output_width * decompress_info.output_components;
+        size_t stride = decompress_info.output_width * static_cast<size_t>(decompress_info.output_components);
 
         while (decompress_info.output_scanline < decompress_info.output_height) {
             lines = jpeg_read_scanlines(&decompress_info, reinterpret_cast<JSAMPARRAY>(&img), 1);
@@ -73,15 +74,15 @@ namespace ragii::image
 
         auto bmp =
             Bitmap::create(
-                image.width,
-                image.height,
+                static_cast<int32_t>(image.width),
+                static_cast<int32_t>(image.height),
                 static_cast<int16_t>(components * 8));
 
         if (!bmp) {
             return nullptr;
         }
 
-        auto stride = PNG_IMAGE_ROW_STRIDE(image);
+        int32_t stride = static_cast<int32_t>(PNG_IMAGE_ROW_STRIDE(image));
 
         ret = png_image_finish_read(&image, nullptr, bmp->getData(), stride, nullptr);
         if (ret == 0) {

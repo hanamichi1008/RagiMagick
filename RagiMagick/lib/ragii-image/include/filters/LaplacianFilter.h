@@ -9,6 +9,7 @@ namespace ragii
         class LaplacianFilter : public IImageFilter
         {
         public:
+            virtual ~LaplacianFilter() override {}
             void apply() override;
         };
 

@@ -17,8 +17,8 @@ namespace
         vector<uint8_t> horiz(w);
         vector<uint8_t> vert(h);
 
-        for (int y = 0; y < h; y++) {
-            for (int x = 0, i = 0; x < w * d; i++, x += d) {
+        for (size_t y = 0; y < h; y++) {
+            for (size_t x = 0, i = 0; x < w * d; i++, x += d) {
                 if (d == 3) {
                     horiz[i] = static_cast<uint8_t>((img[x] + img[x + 1] + img[x + 2]) / 3);
                 }

@@ -22,15 +22,15 @@ namespace ragii
             const BitmapHeader& getHeader() const;
 
             decltype(auto) getData() { return m_Data.get(); }
-            decltype(auto) getData() const { return m_Data.get(); };
+            decltype(auto) getData() const { return m_Data.get(); }
 
             int32_t getWidth() const;
             int32_t getHeight() const;
-            int16_t getBitCount() const;
+            uint16_t getBitCount() const;
 
         private:
             BitmapHeader m_Header = {};
-            ImagePtr m_Data = nullptr;
+            ImagePtr m_Data;
         };
 
     }  // namespace image

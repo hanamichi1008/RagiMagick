@@ -17,7 +17,7 @@ namespace ragii
         class IImageFilter
         {
         public:
-            virtual ~IImageFilter() = default;
+            virtual ~IImageFilter() {}
             virtual void apply() = 0;
 
             void setFilterParams(const FilterParams& params) { m_Params = params; }

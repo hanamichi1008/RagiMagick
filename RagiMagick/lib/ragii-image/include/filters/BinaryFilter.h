@@ -9,6 +9,7 @@ namespace ragii
         class BinaryFilter : public IImageFilter
         {
         public:
+            virtual ~BinaryFilter() override {}
             void apply() override;
         };
 

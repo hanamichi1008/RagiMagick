@@ -9,6 +9,7 @@ namespace ragii
         class GrayscaleFilter : public IImageFilter
         {
         public:
+            virtual ~GrayscaleFilter() override {}
             void apply() override;
         };
 

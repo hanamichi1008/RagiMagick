@@ -9,6 +9,7 @@ namespace ragii
         class GaussianFilter : public IImageFilter
         {
         public:
+            virtual ~GaussianFilter() override {}
             void apply() override;
         };
 
