@@ -49,14 +49,14 @@ namespace ragii::hardware
         {
         }
 
-        inline bool sse() { return (m_Register.edx & (1 << 25)) == (1 << 25); }
-        inline bool sse2() { return (m_Register.edx & (1 << 26)) == (1 << 26); }
-        inline bool sse3() { return (m_Register.ecx & 1) == 1; }
-        inline bool ssse3() { return (m_Register.ecx & (1 << 9)) == (1 << 9); }
-        inline bool sse41() { return (m_Register.ecx & (1 << 19)) == (1 << 19); }
-        inline bool sse42() { return (m_Register.ecx & (1 << 20)) == (1 << 20); }
-        inline bool avx() { return (m_Register.ecx & (1 << 28)) == (1 << 28); }
-        inline bool avx2() { return (m_Register.ebx & (1 << 5)) == (1 << 5); }
+        inline bool sse() { return (m_Register.edx & (1 << 25)) != 0; }
+        inline bool sse2() { return (m_Register.edx & (1 << 26)) != 0; }
+        inline bool sse3() { return (m_Register.ecx & 1) != 0; }
+        inline bool ssse3() { return (m_Register.ecx & (1 << 9)) != 0; }
+        inline bool sse41() { return (m_Register.ecx & (1 << 19)) != 0; }
+        inline bool sse42() { return (m_Register.ecx & (1 << 20)) != 0; }
+        inline bool avx() { return (m_Register.ecx & (1 << 28)) != 0; }
+        inline bool avx2() { return (m_Register.ebx & (1 << 5)) != 0; }
 
     private:
         CpuRegister m_Register;
