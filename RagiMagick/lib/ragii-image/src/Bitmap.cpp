@@ -1,7 +1,6 @@
 ﻿#include <fstream>
 #include <iostream>
 #include <string.h>
-#include <stdlib.h>
 #include "Bitmap.h"
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
