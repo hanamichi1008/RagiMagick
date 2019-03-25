@@ -18,6 +18,10 @@ include(CodeFormat.cmake)
 set(RAGIMAGICK_CODE_FORMAT_TARGET_NAME "${CMAKE_PROJECT_NAME}_code-format")
 format_code(${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 
+# ==================================================
+# コンパイルオプション
+# ==================================================
+
 if (MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
     add_compile_options(/W4)
@@ -33,56 +37,13 @@ source_group("Sources" FILES src/main.cpp)
 # ライブラリのロード
 # ==================================================
 
-# CMAKE_ASM_COMPILE_OBJECT の問題の応急処置
-# ---
-#   Missing variable is: CMAKE_ASM_COMPILE_OBJECT
-#   CMake Error: Error required internal CMake variable not set, cmake may not be built correctly.
-# ---
-# ここから一部抜粋
-# https://chromium.googlesource.com/external/github.com/DynamoRIO/dynamorio/+/release_4_2_0/make/cpp2asm_support.cmake#249
-if(APPLE)
-    set(CMAKE_ASM_COMPILE_OBJECT
-        "${CMAKE_CPP} ${CMAKE_CPP_FLAGS} <FLAGS> <DEFINES> -E <SOURCE> > <OBJECT>.s"
-        "<CMAKE_COMMAND> -Dfile=<OBJECT>.s -P \"${cpp2asm_newline_script_path}\""
-        "<NASM> ${ASM_FLAGS} -o <OBJECT> <OBJECT>.s"
-    )
-elseif(UNIX)
-    set(CMAKE_ASM_COMPILE_OBJECT
-        "${CMAKE_CPP} ${CMAKE_CPP_FLAGS} <FLAGS> <DEFINES> -E <SOURCE> -o <OBJECT>.s"
-        "<CMAKE_COMMAND> -Dfile=<OBJECT>.s -P \"${cpp2asm_newline_script_path}\""
-        "<CMAKE_ASM_COMPILER> ${ASM_FLAGS} -o <OBJECT> <OBJECT>.s"
-    )
-else()
-    set(CMAKE_ASM_COMPILE_OBJECT
-        "<CMAKE_C_COMPILER> ${CMAKE_CPP_FLAGS} <FLAGS> <DEFINES> -E ${CPP_NO_LINENUM} <SOURCE> > <OBJECT>.s"
-        "<CMAKE_COMMAND> -Dfile=<OBJECT>.s -P \"${cpp2asm_newline_script_path}\""
-        "<CMAKE_ASM_COMPILER> ${ASM_FLAGS} /c /Fo<OBJECT> <OBJECT>.s"
-    )
-endif()
-
-# libjpeg-turbo
-message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/libjpeg-turbo")
-add_subdirectory(lib/libjpeg-turbo EXCLUDE_FROM_ALL)
-
-# zlib
-if(${CMAKE_HOST_APPLE})
-    set(CMAKE_MACOSX_RPATH 1)
-endif()
-message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/zlib")
-add_subdirectory(lib/zlib EXCLUDE_FROM_ALL)
-set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/zlib;${CMAKE_BINARY_DIR}/lib/zlib")
-set(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIR}")
-if(${CMAKE_BUILD_TYPE_UC} MATCHES "DEBUG")
-    set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/lib/zlib/Debug/zlibstaticd.lib")
-else()
-    set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/lib/zlib/Release/zlibstatic.lib")
-endif()
-set(ZLIB_LIBRARIES "${ZLIB_LIBRARY}")
-set(ZLIB_FOUND true)
-
-# libpng
-message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/libpng")
-add_subdirectory(lib/libpng EXCLUDE_FROM_ALL)
+set(RAGIMAGICK_EXTERNALLIB_DIR "${CMAKE_CURRENT_LIST_DIR}/external_lib")
+set(RAGIMAGICK_EXTERNALLIB_LIBJPEG_TURBO_SRC "${RAGIMAGICK_EXTERNALLIB_DIR}/libjpeg-turbo/src")
+set(RAGIMAGICK_EXTERNALLIB_LIBJPEG_TURBO_CACHE "${RAGIMAGICK_EXTERNALLIB_DIR}/libjpeg-turbo/build")
+set(RAGIMAGICK_EXTERNALLIB_LIBPNG_SRC "${RAGIMAGICK_EXTERNALLIB_DIR}/libpng/src")
+set(RAGIMAGICK_EXTERNALLIB_LIBPNG_CACHE "${RAGIMAGICK_EXTERNALLIB_DIR}/libpng/build")
+set(RAGIMAGICK_EXTERNALLIB_ZLIB_SRC "${RAGIMAGICK_EXTERNALLIB_DIR}/zlib/src")
+set(RAGIMAGICK_EXTERNALLIB_ZLIB_CACHE "${RAGIMAGICK_EXTERNALLIB_DIR}/zlib/build")
 
 # ragii
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/ragii")
@@ -96,22 +57,23 @@ add_subdirectory(lib/ragii-image)
 # ライブラリのリンク
 # ==================================================
 add_executable(RagiMagick src/main.cpp)
-target_link_libraries(RagiMagick
-    jpeg-static
-    png_static
-    zlibstatic
-    ragii
-    ragii-image
-)
+if(MSVC)
+    target_link_libraries(RagiMagick jpeg-static)
+    target_link_libraries(RagiMagick png_static)
+    target_link_libraries(RagiMagick zlibstatic)
+else()
+    target_link_libraries(RagiMagick ${RAGIMAGICK_EXTERNALLIB_LIBJPEG_TURBO_CACHE}/libturbojpeg.a)
+    target_link_libraries(RagiMagick ${RAGIMAGICK_EXTERNALLIB_LIBPNG_CACHE}/libpng16.a)
+    target_link_libraries(RagiMagick ${RAGIMAGICK_EXTERNALLIB_ZLIB_CACHE}/libz.a)
+endif()
+target_link_libraries(RagiMagick ragii ragii-image)
 
 # ライブラリのインクルード
 target_include_directories(RagiMagick PRIVATE "lib")
-target_include_directories(RagiMagick PRIVATE "${CMAKE_BINARY_DIR}/lib/libpng")
 
 # 依存関係を設定
 # コードフォーマットが最初に実行されるよう、各ターゲットが RAGIMAGICK_CODE_FORMAT_TARGET_NAME に依存するよう設定している
 # ※ ビルド済みでも毎回フォーマットが実行されてしまった。ファイル数が少なくても待ち時間が気になるから無効化しておく。
-add_dependencies(png_static zlibstatic)
 #add_dependencies(ragii ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 #add_dependencies(ragii-image ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 #add_dependencies(RagiMagick ${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
@@ -123,10 +85,12 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/config/UserConfig.cmake")
 endif()
 
 # zlib 後始末
-file(RENAME "./lib/zlib/zconf.h.included" "./lib/zlib/zconf.h")
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/external_lib/zlib/src/zconf.h.included")
+    file(RENAME "./external_lib/zlib/src/zconf.h.included" "./external_lib/zlib/src/zconf.h")
+endif()
 
 # libpng コンパイルに必須のファイルが Ubuntu & MacOSX で生成されない問題への応急処置
-if(${CMAKE_HOST_SYSTEM_NAME} MATCHES Linux|Darwin)
-    file(COPY "./lib/libpng/scripts/pnglibconf.h.prebuilt" DESTINATION "${CMAKE_BINARY_DIR}/lib/libpng")
-    file(RENAME "${CMAKE_BINARY_DIR}/lib/libpng/pnglibconf.h.prebuilt" "${CMAKE_BINARY_DIR}/lib/libpng/pnglibconf.h")
-endif()
+# if(${CMAKE_HOST_SYSTEM_NAME} MATCHES Linux|Darwin)
+#     file(COPY "./external_lib/libpng/src/scripts/pnglibconf.h.prebuilt" DESTINATION "./external_lib/libpng/build")
+#     file(RENAME "./external_lib/libpng/build/pnglibconf.h.prebuilt" "./external_lib/libpng/build/pnglibconf.h")
+# endif()
