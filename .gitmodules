@@ -1,9 +1,9 @@
-[submodule "RagiMagick/lib/libjpeg-turbo"]
-	path = RagiMagick/lib/libjpeg-turbo
+[submodule "RagiMagick/external_lib/libjpeg-turbo/src"]
+	path = RagiMagick/external_lib/libjpeg-turbo/src
 	url = git@github.com:libjpeg-turbo/libjpeg-turbo.git
-[submodule "RagiMagick/lib/libpng"]
-	path = RagiMagick/lib/libpng
+[submodule "RagiMagick/external_lib/libpng/src"]
+	path = RagiMagick/external_lib/libpng/src
 	url = git@github.com:glennrp/libpng.git
-[submodule "RagiMagick/lib/zlib"]
-	path = RagiMagick/lib/zlib
+[submodule "RagiMagick/external_lib/zlib/src"]
+	path = RagiMagick/external_lib/zlib/src
 	url = git@github.com:ragingo/zlib.git
