@@ -9,8 +9,14 @@ namespace ragii
     {
 #if defined(_MSC_VER)
         return reinterpret_cast<T*>(_aligned_malloc(size, align));
-#else
+#elif defined(_LIBCPP_HAS_C11_FEATURES)
         return reinterpret_cast<T*>(std::aligned_alloc(align, size));
+#else
+        T* p = nullptr;
+        if (posix_memalign(reinterpret_cast<void**>(&p), align, size) != 0) {
+            p = nullptr;
+        }
+        return p;
 #endif
     }
 
