@@ -33,6 +33,33 @@ source_group("Sources" FILES src/main.cpp)
 # ライブラリのロード
 # ==================================================
 
+# CMAKE_ASM_COMPILE_OBJECT の問題の応急処置
+# ---
+#   Missing variable is: CMAKE_ASM_COMPILE_OBJECT
+#   CMake Error: Error required internal CMake variable not set, cmake may not be built correctly.
+# ---
+# ここから一部抜粋
+# https://chromium.googlesource.com/external/github.com/DynamoRIO/dynamorio/+/release_4_2_0/make/cpp2asm_support.cmake#249
+if(APPLE)
+    set(CMAKE_ASM_COMPILE_OBJECT
+        "${CMAKE_CPP} ${CMAKE_CPP_FLAGS} <FLAGS> <DEFINES> -E <SOURCE> > <OBJECT>.s"
+        "<CMAKE_COMMAND> -Dfile=<OBJECT>.s -P \"${cpp2asm_newline_script_path}\""
+        "<NASM> ${ASM_FLAGS} -o <OBJECT> <OBJECT>.s"
+    )
+elseif(UNIX)
+    set(CMAKE_ASM_COMPILE_OBJECT
+        "${CMAKE_CPP} ${CMAKE_CPP_FLAGS} <FLAGS> <DEFINES> -E <SOURCE> -o <OBJECT>.s"
+        "<CMAKE_COMMAND> -Dfile=<OBJECT>.s -P \"${cpp2asm_newline_script_path}\""
+        "<CMAKE_ASM_COMPILER> ${ASM_FLAGS} -o <OBJECT> <OBJECT>.s"
+    )
+else()
+    set(CMAKE_ASM_COMPILE_OBJECT
+        "<CMAKE_C_COMPILER> ${CMAKE_CPP_FLAGS} <FLAGS> <DEFINES> -E ${CPP_NO_LINENUM} <SOURCE> > <OBJECT>.s"
+        "<CMAKE_COMMAND> -Dfile=<OBJECT>.s -P \"${cpp2asm_newline_script_path}\""
+        "<CMAKE_ASM_COMPILER> ${ASM_FLAGS} /c /Fo<OBJECT> <OBJECT>.s"
+    )
+endif()
+
 # libjpeg-turbo
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/libjpeg-turbo")
 add_subdirectory(lib/libjpeg-turbo EXCLUDE_FROM_ALL)
