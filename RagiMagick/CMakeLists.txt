@@ -125,8 +125,8 @@ endif()
 # zlib 後始末
 file(RENAME "./lib/zlib/zconf.h.included" "./lib/zlib/zconf.h")
 
-# libpng コンパイルに必須のファイルが Ubuntu で生成されない問題への応急処置
-if(${CMAKE_HOST_SYSTEM_NAME} MATCHES Linux)
+# libpng コンパイルに必須のファイルが Ubuntu & MacOSX で生成されない問題への応急処置
+if(${CMAKE_HOST_SYSTEM_NAME} MATCHES Linux|Darwin)
     file(COPY "./lib/libpng/scripts/pnglibconf.h.prebuilt" DESTINATION "${CMAKE_BINARY_DIR}/lib/libpng")
     file(RENAME "${CMAKE_BINARY_DIR}/lib/libpng/pnglibconf.h.prebuilt" "${CMAKE_BINARY_DIR}/lib/libpng/pnglibconf.h")
 endif()
