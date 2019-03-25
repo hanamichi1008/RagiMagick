@@ -29,10 +29,18 @@ endif()
 
 source_group("Sources" FILES src/main.cpp)
 
+# ==================================================
 # ライブラリのロード
+# ==================================================
+
+# libjpeg-turbo
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/libjpeg-turbo")
 add_subdirectory(lib/libjpeg-turbo EXCLUDE_FROM_ALL)
 
+# zlib
+if(${CMAKE_HOST_APPLE})
+    set(CMAKE_MACOSX_RPATH 1)
+endif()
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/zlib")
 add_subdirectory(lib/zlib EXCLUDE_FROM_ALL)
 set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/lib/zlib;${CMAKE_BINARY_DIR}/lib/zlib")
@@ -45,14 +53,21 @@ endif()
 set(ZLIB_LIBRARIES "${ZLIB_LIBRARY}")
 set(ZLIB_FOUND true)
 
+# libpng
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/libpng")
 add_subdirectory(lib/libpng EXCLUDE_FROM_ALL)
+
+# ragii
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/ragii")
 add_subdirectory(lib/ragii)
+
+# ragii-image
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/ragii-image")
 add_subdirectory(lib/ragii-image)
 
+# ==================================================
 # ライブラリのリンク
+# ==================================================
 add_executable(RagiMagick src/main.cpp)
 target_link_libraries(RagiMagick
     jpeg-static
