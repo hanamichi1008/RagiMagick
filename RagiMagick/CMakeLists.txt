@@ -89,8 +89,8 @@ if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/external_lib/zlib/src/zconf.h.included")
     file(RENAME "./external_lib/zlib/src/zconf.h.included" "./external_lib/zlib/src/zconf.h")
 endif()
 
-# libpng コンパイルに必須のファイルが Ubuntu & MacOSX で生成されない問題への応急処置
-# if(${CMAKE_HOST_SYSTEM_NAME} MATCHES Linux|Darwin)
-#     file(COPY "./external_lib/libpng/src/scripts/pnglibconf.h.prebuilt" DESTINATION "./external_lib/libpng/build")
-#     file(RENAME "./external_lib/libpng/build/pnglibconf.h.prebuilt" "./external_lib/libpng/build/pnglibconf.h")
-# endif()
+# libpng コンパイルに必須のファイルが生成されない問題への応急処置
+if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/external_lib/libpng/build/pnglibconf.h")
+    file(COPY "./external_lib/libpng/src/scripts/pnglibconf.h.prebuilt" DESTINATION "./external_lib/libpng/build")
+    file(RENAME "./external_lib/libpng/build/pnglibconf.h.prebuilt" "./external_lib/libpng/build/pnglibconf.h")
+endif()
