@@ -45,6 +45,10 @@ mkdir ${LIBZLIB_CACHE}
 pushd ${LIBZLIB_CACHE}
 cmake ${LIBZLIB_SRC} ${CMAKE_OPTION}
 cmake --build . -j 4
+pushd ${LIBZLIB_SRC}
+git reset --hard
+git clean -f
+popd
 popd
 
 # libpng
@@ -54,9 +58,9 @@ fi
 mkdir ${LIBPNG_CACHE}
 pushd ${LIBPNG_CACHE}
 if [ "${PLATFORM}" = "win" ]; then
-    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/zlibstatic" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC}" ${CMAKE_OPTION}
+    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/zlibstatic" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC};${LIBZLIB_CACHE}" ${CMAKE_OPTION}
 else
-    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/libz.a" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC}" ${CMAKE_OPTION}
+    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/libz.a" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC};${LIBZLIB_CACHE}" ${CMAKE_OPTION}
 fi
 cmake --build . -j 4
 popd
