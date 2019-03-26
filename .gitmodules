@@ -1,0 +1,9 @@
+[submodule "external_lib/libjpeg-turbo/src"]
+	path = external_lib/libjpeg-turbo/src
+	url = git@github.com:libjpeg-turbo/libjpeg-turbo.git
+[submodule "external_lib/libpng/src"]
+	path = external_lib/libpng/src
+	url = git@github.com:glennrp/libpng.git
+[submodule "external_lib/zlib/src"]
+	path = external_lib/zlib/src
+	url = git@github.com:ragingo/zlib.git
