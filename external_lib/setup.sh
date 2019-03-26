@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 while getopts p: OPT
 do
     case $OPT in
@@ -58,7 +60,7 @@ fi
 mkdir ${LIBPNG_CACHE}
 pushd ${LIBPNG_CACHE}
 if [ "${PLATFORM}" = "win" ]; then
-    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/zlibstatic" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC};${LIBZLIB_CACHE}" ${CMAKE_OPTION}
+    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/Debug/zlibstaticd.lib" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC}:${LIBZLIB_CACHE}" ${CMAKE_OPTION}
 else
     cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/libz.a" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC};${LIBZLIB_CACHE}" ${CMAKE_OPTION}
 fi
