@@ -10,7 +10,7 @@ done
 
 CMAKE_OPTION=""
 
-if [ ${PLATFORM} = "win" ]; then
+if [ "${PLATFORM}" = "win" ]; then
     CMAKE_OPTION="-T llvm"
 fi
 
@@ -53,8 +53,12 @@ if [ -e ${LIBPNG_CACHE} ]; then
 fi
 mkdir ${LIBPNG_CACHE}
 pushd ${LIBPNG_CACHE}
-cmake ${LIBPNG_SRC} -DZLIB_LIBRARY=${LIBZLIB_CACHE}/zlibstatic -DZLIB_INCLUDE_DIR=${LIBZLIB_SRC} ${CMAKE_OPTION}
-cmake --build . -j 1
+if [ "${PLATFORM}" = "win" ]; then
+    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/zlibstatic" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC}" ${CMAKE_OPTION}
+else
+    cmake ${LIBPNG_SRC} -DZLIB_LIBRARY="${LIBZLIB_CACHE}/libz.a" -DZLIB_INCLUDE_DIR="${LIBZLIB_SRC}" ${CMAKE_OPTION}
+fi
+cmake --build . -j 4
 popd
 
 echo "complete!!!"
