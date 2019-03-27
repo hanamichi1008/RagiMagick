@@ -1,4 +1,5 @@
-﻿#include <vector>
+﻿#include <map>
+#include <vector>
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -13,16 +14,35 @@ using namespace ragii::image;
 using namespace ragii::text;
 using namespace ragii::hardware;
 
-struct CommandOption
-{
-    string_view name;
-    string_view value;
-};
-
 void dumpSystemInfo();
 int process(int argc, char* argv[]);
-int convert(vector<CommandOption>& opts);
-int create(vector<CommandOption>& opts);
+int convert();
+int create();
+
+map<string, string> g_opts;
+
+inline bool has_opts()
+{
+    return !g_opts.empty();
+}
+inline bool contains_key(string_view key)
+{
+    return g_opts.count(key.data()) > 0;
+}
+inline bool has_value(string_view key)
+{
+    return !g_opts[key.data()].empty();
+}
+template<typename T>
+inline T get_value(string_view key)
+{
+    return str_to_arithmetic<T>(g_opts[key.data()].c_str());
+}
+template<>
+inline string get_value(string_view key)
+{
+    return g_opts[key.data()];
+}
 
 int main(int argc, char* argv[])
 {
@@ -54,84 +74,76 @@ int process(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    vector<CommandOption> opts;
+    string_view command;
 
     for (int i = 1; i < argc;) {
         auto opt = string_view(argv[i]);
         if (opt[0] == '-') {
             auto value = i + 1 < argc ? argv[i + 1] : "";
-            opts.emplace_back(CommandOption { argv[i], value });
+            g_opts[argv[i]] = value;
             i += 2;
         }
         else {
-            opts.emplace_back(CommandOption { argv[i], "" });
+            command = string_view(argv[i]);
             i++;
         }
     }
 
-    for (auto i : opts) {
-        cout << i.name.data() << ": " << i.value.data() << endl;
-    }
+    cout << command << endl;
 
-    if (opts.empty()) {
-        cout << "コマンドを指定してください。 convert, etc." << endl;
-        return EXIT_FAILURE;
+    for (auto [k, v] : g_opts) {
+        cout << k << ": " << v << endl;
     }
-
-    auto command = opts[0].name;
-    opts.erase(opts.begin());
 
     if (command == "convert") {
-        return convert(opts);
+        return convert();
     }
     if (command == "create") {
-        return create(opts);
+        return create();
     }
 
     cout << "コマンドを指定してください。 convert, etc." << endl;
     return EXIT_FAILURE;
 }
 
-int convert(vector<CommandOption>& opts)
+int convert()
 {
-    if (opts.empty()) {
-        cout << "変換方法を指定してください。 negative, grayscale, etc." << endl;
+    if (!has_opts()) {
+        cout << "オプションを指定してください" << endl;
         return EXIT_FAILURE;
     }
 
-    auto in_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-i"; });
-    if (in_file == opts.end()) {
-        cout << "入力ファイル名を指定してください。" << endl;
+    if (!contains_key("-f") || !has_value("-f")) {
+        cout << "-f 変換方法を指定してください。 negative, grayscale, etc." << endl;
         return EXIT_FAILURE;
     }
-    if (in_file->value.empty()) {
+
+    if (!contains_key("-i") || !has_value("-i")) {
         cout << "入力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
-    if (out_file == opts.end()) {
-        cout << "出力ファイル名を指定してください。" << endl;
-        return EXIT_FAILURE;
-    }
-    if (out_file->value.empty()) {
+    if (!contains_key("-o") || !has_value("-o")) {
         cout << "出力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
     unique_ptr<Bitmap> bmp;
 
-    if (ends_with(in_file->value.data(), ".bmp")) {
-        bmp = Bitmap::loadFromFile(in_file->value.data());
+    const auto& in_file = get_value<string>("-i").c_str();
+    const auto& out_file = get_value<string>("-o").c_str();
+
+    if (ends_with(in_file, ".bmp")) {
+        bmp = Bitmap::loadFromFile(in_file);
     }
-    else if (ends_with(in_file->value.data(), ".jpg")) {
-        bmp = jpeg_to_bmp(in_file->value.data());
+    else if (ends_with(in_file, ".jpg")) {
+        bmp = jpeg_to_bmp(in_file);
     }
-    else if (ends_with(in_file->value.data(), ".png")) {
-        bmp = png_to_bmp(in_file->value.data());
+    else if (ends_with(in_file, ".png")) {
+        bmp = png_to_bmp(in_file);
     }
     else {
-        cout << ".bmp, .jpg, .png 以外は非対応です。" << endl;
+        cout << "入力ファイルは .bmp, .jpg, .png 以外非対応です。" << endl;
         return EXIT_FAILURE;
     }
 
@@ -140,10 +152,9 @@ int convert(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    cout << "width: " << bmp->getWidth() << ", height: " << bmp->getHeight() << ", depth: " << bmp->getBitCount() / 8
-         << endl;
+    cout << "width: " << bmp->getWidth() << ", height: " << bmp->getHeight() << ", depth: " << bmp->getBitCount() / 8 << endl;
 
-    auto filter = opts[0].name;
+    const auto& filter = get_value<string>("-f");
 
     if (filter == "negative") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
@@ -170,74 +181,56 @@ int convert(vector<CommandOption>& opts)
         return EXIT_FAILURE;
     }
 
-    bmp->save(out_file->value.data());
+    bmp->save(out_file);
     cout << "converted." << endl;
 
     return EXIT_SUCCESS;
 }
 
 // RagiMagick create -w 32 -h 32 -d 3 -p checkered -o out.bmp
-int create(vector<CommandOption>& opts)
+int create()
 {
-    if (opts.empty()) {
-        cout << "オプションが不足しています。" << endl;
+    if (has_opts()) {
+        cout << "オプションを指定してください" << endl;
         return EXIT_FAILURE;
     }
 
-    auto out_file = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-o"; });
-    if (out_file == opts.end()) {
-        cout << "出力ファイル名を指定してください。" << endl;
-        return EXIT_FAILURE;
-    }
-    if (out_file->value.empty()) {
+    if (!contains_key("-o") || !has_value("-o")) {
         cout << "出力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    auto w = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-w"; });
-    if (w == opts.end()) {
+    if (!contains_key("-w") || !has_value("-w")) {
         cout << "-w (幅) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
-    if (w->value.empty()) {
-        cout << "幅の値を指定してください。" << endl;
-        return EXIT_FAILURE;
-    }
 
-    auto h = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-h"; });
-    if (h == opts.end()) {
+    if (!contains_key("-h") || !has_value("-h")) {
         cout << "-h (高さ) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
-    if (h->value.empty()) {
-        cout << "高さの値を指定してください。" << endl;
-        return EXIT_FAILURE;
-    }
 
-    auto d = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-d"; });
-    if (d == opts.end()) {
+    if (!contains_key("-d") || !has_value("-d")) {
         cout << "-d (ビット深度 3: 24bit, 4: 32bit) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
-    if (d->value.empty()) {
-        cout << "ビット深度の値を指定してください。" << endl;
-        return EXIT_FAILURE;
-    }
-    if (!is_digit(d->value[0])) {
+    if (!is_digit(get_value<string>("-d")[0])) {
         cout << "ビット深度の値が不正です。" << endl;
         return EXIT_FAILURE;
     }
 
-    auto p = find_if(opts.begin(), opts.end(), [&](auto i) { return i.name == "-p"; });
-    if (p == opts.end()) {
+    if (!contains_key("-p") || !has_value("-p")) {
         cout << "-p (パターン) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    auto bmp = Bitmap::create(str_to_arithmetic<int32_t>(w->value.data()), str_to_arithmetic<int32_t>(h->value.data()),
-                              str_to_arithmetic<int16_t>(d->value.data()) * 8);
+    auto bmp =
+        Bitmap::create(
+            get_value<int32_t>("-w"),
+            get_value<int32_t>("-h"),
+            get_value<int32_t>("-d") * 8);
 
-    if (p->value == "checkered") {
+    if (get_value<string>("-p") == "checkered") {
         auto data = bmp->getData();
         auto depth = bmp->getBitCount() / 8;
         for (int y = 0; y < bmp->getHeight(); y++) {
@@ -249,7 +242,7 @@ int create(vector<CommandOption>& opts)
         }
     }
 
-    bmp->save(out_file->value.data());
+    bmp->save(get_value<string>("-o").c_str());
 
     cout << "created." << endl;
 
