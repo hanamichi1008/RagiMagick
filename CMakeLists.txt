@@ -31,6 +31,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU|AppleClang)
     add_compile_options(-Wno-unused-function -Wno-unused-parameter -Wno-padded -Wno-sign-conversion -Wno-sign-compare)
 endif()
 
+source_group("Headers" FILES src/CommandLine.h)
 source_group("Sources" FILES src/main.cpp)
 
 # ==================================================

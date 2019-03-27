@@ -9,41 +9,20 @@
 #include "ragii-image/include/Bitmap.h"
 #include "ragii-image/include/BitmapConverter.h"
 #include "ragii-image/include/util.h"
+#include "CommandLine.h"
 
 using namespace std;
 using namespace ragii::image;
 using namespace ragii::text;
 using namespace ragii::hardware;
+using namespace RagiMagick;
 
 void dumpSystemInfo();
 int process(int argc, char* argv[]);
 int convert();
 int create();
 
-map<string, string> g_opts;
-
-inline bool has_opts()
-{
-    return !g_opts.empty();
-}
-inline bool contains_key(string_view key)
-{
-    return g_opts.count(key.data()) > 0;
-}
-inline bool has_value(string_view key)
-{
-    return !g_opts[key.data()].empty();
-}
-template<typename T>
-inline T get_value(string_view key)
-{
-    return str_to_arithmetic<T>(g_opts[key.data()].c_str());
-}
-template<>
-inline string get_value(string_view key)
-{
-    return g_opts[key.data()];
-}
+unique_ptr<CommandLine> g_cmd;
 
 int main(int argc, char* argv[])
 {
@@ -75,31 +54,16 @@ int process(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    string_view command;
+    g_cmd = CommandLine::parse(argc, argv);
 
-    for (int i = 1; i < argc;) {
-        auto opt = string_view(argv[i]);
-        if (opt[0] == '-') {
-            auto value = i + 1 < argc ? argv[i + 1] : "";
-            g_opts[argv[i]] = value;
-            i += 2;
-        }
-        else {
-            command = string_view(argv[i]);
-            i++;
-        }
+    if (!g_cmd) {
+        return EXIT_FAILURE;
     }
 
-    cout << command.data() << endl;
-
-    for (auto [k, v] : g_opts) {
-        cout << k << ": " << v << endl;
-    }
-
-    if (command == "convert") {
+    if (g_cmd->getCommand() == "convert") {
         return convert();
     }
-    if (command == "create") {
+    if (g_cmd->getCommand() == "create") {
         return create();
     }
 
@@ -109,30 +73,30 @@ int process(int argc, char* argv[])
 
 int convert()
 {
-    if (!has_opts()) {
+    if (!g_cmd->hasOptions()) {
         cout << "オプションを指定してください" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-f") || !has_value("-f")) {
+    if (!g_cmd->containsKey("-f") || !g_cmd->hasValue("-f")) {
         cout << "-f 変換方法を指定してください。 negative, grayscale, etc." << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-i") || !has_value("-i")) {
+    if (!g_cmd->containsKey("-i") || !g_cmd->hasValue("-i")) {
         cout << "入力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-o") || !has_value("-o")) {
+    if (!g_cmd->containsKey("-o") || !g_cmd->hasValue("-o")) {
         cout << "出力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
     unique_ptr<Bitmap> bmp;
 
-    auto in_file = get_value<string>("-i");
-    auto out_file = get_value<string>("-o");
+    auto in_file = g_cmd->getValue<string>("-i");
+    auto out_file = g_cmd->getValue<string>("-o");
 
     if (ends_with(in_file.c_str(), ".bmp")) {
         cout << "start Bitmap::loadFromFile" << endl;
@@ -158,7 +122,7 @@ int convert()
 
     cout << "width: " << bmp->getWidth() << ", height: " << bmp->getHeight() << ", depth: " << bmp->getBitCount() / 8 << endl;
 
-    const auto& filter = get_value<string>("-f");
+    const auto& filter = g_cmd->getValue<string>("-f");
 
     if (filter == "negative") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Negative);
@@ -194,47 +158,47 @@ int convert()
 // RagiMagick create -w 32 -h 32 -d 3 -p checkered -o out.bmp
 int create()
 {
-    if (has_opts()) {
+    if (g_cmd->hasOptions()) {
         cout << "オプションを指定してください" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-o") || !has_value("-o")) {
+    if (!g_cmd->containsKey("-o") || !g_cmd->hasValue("-o")) {
         cout << "出力ファイル名を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-w") || !has_value("-w")) {
+    if (!g_cmd->containsKey("-w") || !g_cmd->hasValue("-w")) {
         cout << "-w (幅) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-h") || !has_value("-h")) {
+    if (!g_cmd->containsKey("-h") || !g_cmd->hasValue("-h")) {
         cout << "-h (高さ) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-d") || !has_value("-d")) {
+    if (!g_cmd->containsKey("-d") || !g_cmd->hasValue("-d")) {
         cout << "-d (ビット深度 3: 24bit, 4: 32bit) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
-    if (!is_digit(get_value<string>("-d")[0])) {
+    if (!is_digit(g_cmd->getValue<string>("-d")[0])) {
         cout << "ビット深度の値が不正です。" << endl;
         return EXIT_FAILURE;
     }
 
-    if (!contains_key("-p") || !has_value("-p")) {
+    if (!g_cmd->containsKey("-p") || !g_cmd->hasValue("-p")) {
         cout << "-p (パターン) を指定してください。" << endl;
         return EXIT_FAILURE;
     }
 
     auto bmp =
         Bitmap::create(
-            get_value<int32_t>("-w"),
-            get_value<int32_t>("-h"),
-            get_value<int32_t>("-d") * 8);
+            g_cmd->getValue<int32_t>("-w"),
+            g_cmd->getValue<int32_t>("-h"),
+            g_cmd->getValue<int32_t>("-d") * 8);
 
-    if (get_value<string>("-p") == "checkered") {
+    if (g_cmd->getValue<string>("-p") == "checkered") {
         auto data = bmp->getData();
         auto depth = bmp->getBitCount() / 8;
         for (int y = 0; y < bmp->getHeight(); y++) {
@@ -246,7 +210,7 @@ int create()
         }
     }
 
-    bmp->save(get_value<string>("-o").c_str());
+    bmp->save(g_cmd->getValue<string>("-o").c_str());
 
     cout << "created." << endl;
 
