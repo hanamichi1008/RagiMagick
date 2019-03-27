@@ -132,7 +132,7 @@ namespace ragii
             size_t i = 0;
             auto p = begin<C>(s);
             while (*p != C('\0')) {
-                if (*p != *begin<C>(s)) {
+                if (p != begin<C>(s)) {
                     ++i;
                 }
                 ++p;
@@ -158,13 +158,18 @@ namespace ragii
         template<class C, typename std::enable_if<ragii::is_char_v<C>, std::nullptr_t>::type = nullptr>
         constexpr bool starts_with(const C* base, const C* search)
         {
+            const size_t base_len = length<C>(base);
+            const size_t search_len = length<C>(search);
+
+            if (base_len < search_len) {
+                return false;
+            }
+
             const C null = C('\0');
             while (*base != null && *search != null) {
-                if (*base != *search) {
+                if (*base++ != *search++) {
                     return false;
                 }
-                base++;
-                search++;
             }
             return true;
         }

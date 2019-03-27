@@ -134,12 +134,15 @@ int convert()
     const auto& out_file = get_value<string>("-o").c_str();
 
     if (ends_with(in_file, ".bmp")) {
+        cout << "start Bitmap::loadFromFile" << endl;
         bmp = Bitmap::loadFromFile(in_file);
     }
     else if (ends_with(in_file, ".jpg")) {
+        cout << "start jpeg_to_bmp" << endl;
         bmp = jpeg_to_bmp(in_file);
     }
     else if (ends_with(in_file, ".png")) {
+        cout << "start png_to_bmp" << endl;
         bmp = png_to_bmp(in_file);
     }
     else {
