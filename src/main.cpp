@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <string>
 #include "ragii/include/text/text.h"
 #include "ragii/include/hardware/cpu_info.h"
 #include "ragii-image/include/Bitmap.h"
@@ -89,7 +90,7 @@ int process(int argc, char* argv[])
         }
     }
 
-    cout << command << endl;
+    cout << command.data() << endl;
 
     for (auto [k, v] : g_opts) {
         cout << k << ": " << v << endl;
