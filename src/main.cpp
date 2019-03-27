@@ -130,18 +130,18 @@ int convert()
 
     unique_ptr<Bitmap> bmp;
 
-    const auto& in_file = get_value<string>("-i").c_str();
-    const auto& out_file = get_value<string>("-o").c_str();
+    auto in_file = get_value<string>("-i");
+    auto out_file = get_value<string>("-o");
 
-    if (ends_with(in_file, ".bmp")) {
+    if (ends_with(in_file.c_str(), ".bmp")) {
         cout << "start Bitmap::loadFromFile" << endl;
         bmp = Bitmap::loadFromFile(in_file);
     }
-    else if (ends_with(in_file, ".jpg")) {
+    else if (ends_with(in_file.c_str(), ".jpg")) {
         cout << "start jpeg_to_bmp" << endl;
         bmp = jpeg_to_bmp(in_file);
     }
-    else if (ends_with(in_file, ".png")) {
+    else if (ends_with(in_file.c_str(), ".png")) {
         cout << "start png_to_bmp" << endl;
         bmp = png_to_bmp(in_file);
     }
