@@ -5,7 +5,7 @@ namespace ragii
 {
     template<class T>
     struct is_char
-        : std::bool_constant<std::is_same_v<T, char> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t>>
+        : std::bool_constant<std::is_same_v<T, char> || std::is_same_v<T, char16_t> || std::is_same_v<T, char32_t> || std::is_same_v<T, wchar_t>>
     {};
 
     template<class T>

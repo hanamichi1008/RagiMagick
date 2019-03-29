@@ -210,7 +210,7 @@ int create()
         }
     }
 
-    bmp->save(g_cmd->getValue<string>("-o").c_str());
+    bmp->save(g_cmd->getValue<string>("-o"));
 
     cout << "created." << endl;
 

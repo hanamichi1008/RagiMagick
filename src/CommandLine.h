@@ -62,6 +62,12 @@ namespace RagiMagick {
             return m_Opts[key.data()];
         }
 
+        template<>
+        inline std::string_view getValue(std::string_view key)
+        {
+            return m_Opts[key.data()];
+        }
+
 
     private:
         std::string m_Command;

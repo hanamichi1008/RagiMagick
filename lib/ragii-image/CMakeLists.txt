@@ -15,7 +15,7 @@ if (MSVC)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang|GNU|AppleClang)
     add_compile_options(-Wall -Wextra -pedantic)
     add_compile_options(-Wno-unused-function -Wno-unused-parameter -Wno-padded -Wno-sign-conversion -Wno-sign-compare)
-    add_compile_options(-mfma4 -mxop -msse2 -msse3 -msse4a -msse4.1 -msse4.2 -mavx -mavx2 -mxsave)
+    add_compile_options(-mfma4 -mxop -msse2 -msse3 -mssse3 -msse4a -msse4.1 -msse4.2 -mavx -mavx2 -mxsave)
 endif()
 
 file(GLOB RAGII_IMAGE_HEADERS include/*.h)

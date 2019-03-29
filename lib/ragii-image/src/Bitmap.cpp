@@ -4,9 +4,59 @@
 #include "Bitmap.h"
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
+#include "hardware/cpu_info.h"
 
+using namespace ragii;
+using namespace ragii::hardware;
 using namespace ragii::image;
 using namespace std;
+
+namespace
+{
+    inline auto bgr24_to_bgra32_default(uint8_t* src, int width, int height)
+    {
+        auto dst = aligned_allocator<uint8_t>::make_unique(width * height * 4, 16);
+        auto p = dst.get();
+
+#if defined(__clang__)
+#    pragma clang loop vectorize(disable)
+#elif defined(_MSC_VER)
+#    pragma loop(no_vector)
+#endif
+        for (int i = 0; i < width * height * 3; i += 3) {
+            p[0] = src[i + 0];
+            p[1] = src[i + 1];
+            p[2] = src[i + 2];
+            p[3] = 0;
+            p += 4;
+        }
+
+        return dst;
+    }
+
+    inline auto bgr24_to_bgra32(uint8_t* src, int width, int height)
+    {
+        CpuInfo info;
+        auto reg = info.load(1);
+        CpuAvailableFeatures features(reg);
+
+        features = CpuAvailableFeatures({}); // debug
+
+        unique_ptr<uint8_t, aligned_deleter<uint8_t>> dst;
+
+        if (features.avx2()) {
+        }
+        else if (features.avx()) {
+        }
+        else if (features.sse42()) {
+        }
+        else {
+            dst = bgr24_to_bgra32_default(src, width, height);
+        }
+
+        return dst;
+    }
+}  // namespace
 
 unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 {
@@ -57,9 +107,29 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     }
 
     uint32_t dataSize = static_cast<uint32_t>(fileSize - static_cast<streampos>(bmp->m_Header.File.OffBits));
-    bmp->m_Data = aligned_allocator<uint8_t>::make_unique(bmp->m_Header.Info.SizeImage, 16);
 
-    fs.read(reinterpret_cast<char*>(bmp->m_Data.get()), dataSize);
+    auto src = aligned_allocator<uint8_t>::make_unique(bmp->m_Header.Info.SizeImage, 16);
+    fs.read(reinterpret_cast<char*>(src.get()), dataSize);
+
+    // TODO: 16, 8
+    if (bmp->getBitCount() == 24)
+    {
+        auto& file = bmp->m_Header.File;
+        auto& info = bmp->m_Header.Info;
+
+        auto dst = bgr24_to_bgra32(src.get(), info.Width, info.Height);
+        bmp->m_Data.swap(dst);
+
+        // ヘッダ更新
+        file.Size = BitmapHeaderSize + static_cast<uint32_t>(info.Width * info.Height * 32 / 8);
+        info.BitCount = 32;
+        info.SizeImage = static_cast<uint32_t>(info.Width * info.Height * 32 / 8);
+    }
+    else
+    {
+        bmp->m_Data.swap(src);
+    }
+
     fs.close();
 
     return bmp;
