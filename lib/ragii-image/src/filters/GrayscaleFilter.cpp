@@ -38,15 +38,12 @@ void GrayscaleFilter::apply()
 
     __m128i src;
     __m128i shuffle_b, shuffle_g, shuffle_r, shuffle_result;
-    __m128 s_b, s_g, s_r;
-    __m128 m_b, m_g, m_r;
-    __m128 s_gray;
-    __m128i i_gray;
+    __m128 single_b, single_g, single_r;
+    __m128 mul_b, mul_g, mul_r;
+    __m128 single_gray;
+    __m128i uint_gray;
 
     for (int i = 0; i < w * h; i += 4) {
-        // TODO:
-        // グレースケールにはなったけど・・・なぜがモザイクが掛かったようになってしまった。直す。
-
         // 4px (4bytes/px * 4) ロード
         src = _mm_load_si128(reinterpret_cast<__m128i*>(img));
 
@@ -56,23 +53,23 @@ void GrayscaleFilter::apply()
         shuffle_r = _mm_shuffle_epi8(src, mapping_r);
 
         // float化(係数の型に合わせる)
-        s_b = _mm_cvtepi32_ps(shuffle_b);
-        s_g = _mm_cvtepi32_ps(shuffle_g);
-        s_r = _mm_cvtepi32_ps(shuffle_r);
+        single_b = _mm_cvtepi32_ps(shuffle_b);
+        single_g = _mm_cvtepi32_ps(shuffle_g);
+        single_r = _mm_cvtepi32_ps(shuffle_r);
 
         // 乗算
-        m_b = _mm_mul_ps(s_b, weight_b);
-        m_g = _mm_mul_ps(s_g, weight_g);
-        m_r = _mm_mul_ps(s_r, weight_r);
+        mul_b = _mm_mul_ps(single_b, weight_b);
+        mul_g = _mm_mul_ps(single_g, weight_g);
+        mul_r = _mm_mul_ps(single_r, weight_r);
 
         // 加算
-        s_gray = _mm_add_ps(_mm_add_ps(m_b, m_g), m_r);
+        single_gray = _mm_add_ps(_mm_add_ps(mul_b, mul_g), mul_r);
 
         // uint8化(格納する型に合わせる)
-        i_gray = _mm_cvtps_epi32(s_gray);
+        uint_gray = _mm_cvtps_epi32(single_gray);
 
         // 並べ替え
-        shuffle_result = _mm_shuffle_epi8(i_gray, mapping_result);
+        shuffle_result = _mm_shuffle_epi8(uint_gray, mapping_result);
 
         // 格納
         _mm_store_si128(reinterpret_cast<__m128i*>(img), shuffle_result);
