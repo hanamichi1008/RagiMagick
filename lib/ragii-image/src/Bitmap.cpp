@@ -118,7 +118,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
         auto& info = bmp->m_Header.Info;
 
         auto dst = bgr24_to_bgra32(src.get(), info.Width, info.Height);
-        bmp->m_Data.swap(dst);
+        bmp->m_Data = move(dst);
 
         // ヘッダ更新
         file.Size = BitmapHeaderSize + static_cast<uint32_t>(info.Width * info.Height * 32 / 8);
@@ -127,7 +127,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     }
     else
     {
-        bmp->m_Data.swap(src);
+        bmp->m_Data = move(src);
     }
 
     fs.close();

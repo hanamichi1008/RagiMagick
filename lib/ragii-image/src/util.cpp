@@ -39,7 +39,7 @@ namespace ragii::image
             return nullptr;
         }
 
-        auto img = bmp->getData();
+        auto img = bmp->getData().get();
         size_t lines = 0;
         size_t stride = decompress_info.output_width * static_cast<size_t>(decompress_info.output_components);
 
@@ -84,7 +84,7 @@ namespace ragii::image
 
         int32_t stride = static_cast<int32_t>(PNG_IMAGE_ROW_STRIDE(image));
 
-        ret = png_image_finish_read(&image, nullptr, bmp->getData(), stride, nullptr);
+        ret = png_image_finish_read(&image, nullptr, bmp->getData().get(), stride, nullptr);
         if (ret == 0) {
             return nullptr;
         }

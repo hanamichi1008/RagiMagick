@@ -12,7 +12,7 @@ namespace ragii
         class Bitmap
         {
         public:
-            using ImagePtr = std::unique_ptr<uint8_t, aligned_deleter<uint8_t>>;
+            using ImagePtr = std::shared_ptr<uint8_t>;
 
             static std::unique_ptr<Bitmap> loadFromFile(std::string path);
             static std::unique_ptr<Bitmap> create(int32_t width, int32_t height, int16_t bitCount = 24);
@@ -21,8 +21,8 @@ namespace ragii
 
             const BitmapHeader& getHeader() const;
 
-            decltype(auto) getData() { return m_Data.get(); }
-            decltype(auto) getData() const { return m_Data.get(); }
+            decltype(auto) getData() { return m_Data; }
+            decltype(auto) getData() const { return m_Data; }
 
             int32_t getWidth() const;
             int32_t getHeight() const;

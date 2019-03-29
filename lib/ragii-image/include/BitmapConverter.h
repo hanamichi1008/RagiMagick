@@ -8,7 +8,7 @@ namespace ragii
     {
         class Bitmap;
 
-        // TODO(YouGi): このクラスはあとで捨てる
+        // TODO: このクラスはあとで捨てる
         class BitmapConverter
         {
         public:

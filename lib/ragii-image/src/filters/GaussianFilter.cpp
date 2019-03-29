@@ -112,7 +112,7 @@ void GaussianFilter::apply()
     int w = m_Params.width;
     int h = m_Params.height;
     int d = m_Params.bitCount / 8;
-    uint8_t* img = m_Params.image;
+    uint8_t* img = m_Params.image.get();
 
     if (/*d != 3 && */ d != 4) {
         cout << "depth " << d << " not supported." << endl;

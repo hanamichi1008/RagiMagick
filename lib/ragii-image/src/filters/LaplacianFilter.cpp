@@ -1,9 +1,11 @@
 ﻿#include <algorithm>
 #include <iostream>
 #include <memory>
+#include "memory/memory.h"
 #include "LaplacianFilter.h"
 
 using namespace std;
+using namespace ragii;
 using namespace ragii::image;
 
 namespace
@@ -35,12 +37,14 @@ void LaplacianFilter::apply()
     int w = m_Params.width;
     int h = m_Params.height;
     int d = m_Params.bitCount / 8;
-    uint8_t* img = m_Params.image;
+    auto img = m_Params.image.get();
 
-    if (d != 3 && d != 4) {
+    if (d != 4) {
         cout << "depth " << d << " not supported." << endl;
         return;
     }
+
+    auto dst = aligned_allocator<uint8_t>::make_unique(w * h * d, 16);
 
     // 係数
     int coef[] = { -1, -1, -1, -1, 8, -1, -1, -1, -1 };
@@ -50,11 +54,7 @@ void LaplacianFilter::apply()
     // 基準ピクセルからの行オフセット
     int rowOffsets[] = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
     // 基準ピクセルからの列オフセット
-    int bgrColOffsets[] = { -3, 0, 3, -3, 0, 3, -3, 0, 3 };
-    // 基準ピクセルからの列オフセット
-    int bgraColOffsets[] = { -4, 0, 4, -4, 0, 4, -4, 0, 4 };
-
-    const int* colOffsets = d == 3 ? bgrColOffsets : bgraColOffsets;
+    int colOffsets[] = { -4, 0, 4, -4, 0, 4, -4, 0, 4 };
 
     int row, col = 0;
     int i = 0;
@@ -76,7 +76,9 @@ void LaplacianFilter::apply()
             resultColor.g = std::clamp(resultColor.g, 0x00, 0xff);
             resultColor.r = std::clamp(resultColor.r, 0x00, 0xff);
 
-            setColor(img, w, d, row, col, resultColor);
+            setColor(dst.get(), w, d, row, col, resultColor);
         }
     }
+
+    m_Params.image = move(dst);
 }

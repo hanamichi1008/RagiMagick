@@ -199,7 +199,7 @@ int create()
             g_cmd->getValue<int32_t>("-d") * 8);
 
     if (g_cmd->getValue<string>("-p") == "checkered") {
-        auto data = bmp->getData();
+        auto data = bmp->getData().get();
         auto depth = bmp->getBitCount() / 8;
         for (int y = 0; y < bmp->getHeight(); y++) {
             for (int x = 0; x < bmp->getWidth(); x++) {
