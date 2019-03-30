@@ -142,6 +142,9 @@ int convert()
     else if (filter == "mosaic") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Mosaic);
     }
+    else if (filter == "hsv") {
+        BitmapConverter::applyFilter(bmp.get(), FilterType::Hsv);
+    }
     else {
         cout << "未知のコマンドが指定されています！" << endl;
         return EXIT_FAILURE;

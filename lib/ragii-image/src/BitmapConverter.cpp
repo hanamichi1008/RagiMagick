@@ -6,6 +6,7 @@
 #include "filters/BinaryFilter.h"
 #include "filters/GaussianFilter.h"
 #include "filters/GrayscaleFilter.h"
+#include "filters/HsvFilter.h"
 #include "filters/IImageFilter.h"
 #include "filters/LaplacianFilter.h"
 #include "filters/MosaicFilter.h"
@@ -42,6 +43,9 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
             break;
         case FilterType::Mosaic:
             filter = make_unique<MosaicFilter>();
+            break;
+        case FilterType::Hsv:
+            filter = make_unique<HsvFilter>();
             break;
     }
 

@@ -12,6 +12,7 @@ namespace ragii
             Laplacian,
             Gaussian,
             Mosaic,
+            Hsv
         };
 
     }  // namespace image
