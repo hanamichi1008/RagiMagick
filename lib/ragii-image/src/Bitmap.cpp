@@ -156,7 +156,7 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
     info.SizeImage = static_cast<uint32_t>(width * height * bitCount / 8);
     memcpy(&bmp->m_Header.Info, &info, BitmapInfoHeaderSize);
 
-    bmp->m_Data = aligned_allocator<uint8_t>::make_unique(bmp->m_Header.Info.SizeImage, 16);
+    bmp->m_Data = aligned_allocator<uint8_t>::make_shared(bmp->m_Header.Info.SizeImage, 16);
 
     return bmp;
 }

@@ -158,7 +158,7 @@ int convert()
 // RagiMagick create -w 32 -h 32 -d 3 -p checkered -o out.bmp
 int create()
 {
-    if (g_cmd->hasOptions()) {
+    if (!g_cmd->hasOptions()) {
         cout << "オプションを指定してください" << endl;
         return EXIT_FAILURE;
     }
