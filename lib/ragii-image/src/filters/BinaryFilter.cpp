@@ -95,21 +95,15 @@ namespace
 
 }  // namespace
 
-void BinaryFilter::apply()
+FilterInfo BinaryFilter::apply(const FilterInfo& info)
 {
-    int w = m_Params.width;
-    int h = m_Params.height;
-    int d = m_Params.bitCount / 8;
+    int w = info.width;
+    int h = info.height;
+    int d = info.bitCount / 8;
+    auto img = info.image.get();
 
-    if (d != 4) {
-        cout << "depth " << d << " not supported." << endl;
-        return;
-    }
-
-    auto img = m_Params.image.get();
-
-    CpuInfo info;
-    auto reg = info.load(1);
+    CpuInfo cpu_info;
+    auto reg = cpu_info.load(1);
     CpuAvailableFeatures features(reg);
 
     if (features.avx2()) {
@@ -125,4 +119,6 @@ void BinaryFilter::apply()
     else {
         binary_normal(img, w, h, d);
     }
+
+    return FilterInfo { info.width, info.height, info.bitCount, info.image };
 }

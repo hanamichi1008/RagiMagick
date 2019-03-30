@@ -7,12 +7,11 @@ namespace ragii
 {
     namespace image
     {
-        struct FilterParams
+        struct FilterInfo
         {
             int width;
             int height;
             int bitCount;
-            //[[deprecated]] uint8_t* image;
             std::shared_ptr<uint8_t> image;
         };
 
@@ -20,12 +19,7 @@ namespace ragii
         {
         public:
             virtual ~IImageFilter() {}
-            virtual void apply() = 0;
-
-            void setFilterParams(const FilterParams& params) { m_Params = params; }
-
-        protected:
-            FilterParams m_Params;
+            virtual FilterInfo apply(const FilterInfo& info) = 0;
         };
 
     }  // namespace image

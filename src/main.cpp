@@ -134,8 +134,6 @@ int convert()
         BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
     }
     else if (filter == "laplacian") {
-        // BitmapConverter::applyFilter(bmp.get(), FilterType::Grayscale);
-        BitmapConverter::applyFilter(bmp.get(), FilterType::Binary);
         BitmapConverter::applyFilter(bmp.get(), FilterType::Laplacian);
     }
     else if (filter == "gaussian") {

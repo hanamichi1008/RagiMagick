@@ -16,11 +16,11 @@ using namespace ragii::image;
 
 void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
 {
-    FilterParams params;
-    params.width = bmp->getWidth();
-    params.height = bmp->getHeight();
-    params.bitCount = bmp->getBitCount();
-    params.image = bmp->getData();
+    FilterInfo info;
+    info.width = bmp->getWidth();
+    info.height = bmp->getHeight();
+    info.bitCount = bmp->getBitCount();
+    info.image = bmp->getData();
 
     unique_ptr<IImageFilter> filter;
 
@@ -46,11 +46,10 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
     }
 
     if (filter) {
-        filter->setFilterParams(params);
-
         auto start = chrono::system_clock::now();
 
-        filter->apply();
+        info = filter->apply(info);
+        bmp->setData(info.image);
 
         auto end = chrono::system_clock::now();
         auto elapsed = chrono::duration_cast<chrono::microseconds>(end - start).count();

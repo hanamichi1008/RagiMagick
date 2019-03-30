@@ -24,6 +24,11 @@ namespace ragii
             decltype(auto) getData() { return m_Data; }
             decltype(auto) getData() const { return m_Data; }
 
+            void setData(ImagePtr data)
+            {
+                m_Data.swap(data);
+            }
+
             int32_t getWidth() const;
             int32_t getHeight() const;
             uint16_t getBitCount() const;

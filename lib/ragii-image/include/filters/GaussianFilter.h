@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "IImageFilter.h"
 
@@ -10,7 +10,7 @@ namespace ragii
         {
         public:
             virtual ~GaussianFilter() override {}
-            void apply() override;
+            FilterInfo apply(const FilterInfo& info) override;
         };
 
     }  // namespace image

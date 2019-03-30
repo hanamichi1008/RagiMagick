@@ -1,6 +1,7 @@
 ﻿#include <algorithm>
 #include <array>
 #include <iostream>
+#include <cmath>
 #include "common.h"
 #include "GaussianFilter.h"
 
@@ -48,15 +49,7 @@ namespace
 
     // 基準ピクセルからの列オフセット(3x3)
     // clang-format off
-    constexpr array<int, SmallKernelSize> SmallKernelColOffsetsBGR = {
-        -3, 0, 3,
-        -3, 0, 3,
-        -3, 0, 3
-    };
-
-    // 基準ピクセルからの列オフセット(3x3)
-    // clang-format off
-    constexpr array<int, SmallKernelSize> SmallKernelColOffsetsBGRA = {
+    constexpr array<int, SmallKernelSize> SmallKernelColOffsets = {
         -4, 0, 4,
         -4, 0, 4,
         -4, 0, 4
@@ -64,17 +57,7 @@ namespace
 
     // 基準ピクセルからの列オフセット(5x5)
     // clang-format off
-    constexpr array<int, LargeKernelSize> LargeKernelColOffsetsBGR = {
-        -6, -3, 0, 3, 6,
-        -6, -3, 0, 3, 6,
-        -6, -3, 0, 3, 6,
-        -6, -3, 0, 3, 6,
-        -6, -3, 0, 3, 6
-    };
-
-    // 基準ピクセルからの列オフセット(5x5)
-    // clang-format off
-    constexpr array<int, LargeKernelSize> LargeKernelColOffsetsBGRA = {
+    constexpr array<int, LargeKernelSize> LargeKernelColOffsets = {
         -8, -4, 0, 4, 8,
         -8, -4, 0, 4, 8,
         -8, -4, 0, 4, 8,
@@ -105,53 +88,56 @@ namespace
         *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
     }
 
-}  // namespace
+    inline void gaussian_default(uint8_t* img, int width, int height, int depth, bool use_large_kernel)
+    {
+        int row, col = 0;
+        size_t i = 0;
+        Color tempColor = {};
+        Color resultColor = {};
 
-void GaussianFilter::apply()
-{
-    int w = m_Params.width;
-    int h = m_Params.height;
-    int d = m_Params.bitCount / 8;
-    uint8_t* img = m_Params.image.get();
+        int initialRow;
+        if (use_large_kernel) {
+            initialRow = abs(LargeKernelRowOffsets[0]);
+        }
+        else {
+            initialRow = abs(SmallKernelRowOffsets[0]);
+        }
 
-    if (/*d != 3 && */ d != 4) {
-        cout << "depth " << d << " not supported." << endl;
-        return;
-    }
+        for (row = initialRow; row < height - initialRow; row++) {
+            for (col = depth; col < width * depth - depth; col += depth) {
+                resultColor = {};
 
-    int row, col = 0;
-    size_t i = 0;
-    Color tempColor = {};
-    Color resultColor = {};
+                if (use_large_kernel) {
+                    for (i = 0; i < LargeKernel.size(); i++) {
+                        tempColor = getColor(img, width, depth, row + LargeKernelRowOffsets[i], col + LargeKernelColOffsets[i]);
+                        resultColor.b += static_cast<int>(tempColor.b * LargeKernel[i]);
+                        resultColor.g += static_cast<int>(tempColor.g * LargeKernel[i]);
+                        resultColor.r += static_cast<int>(tempColor.r * LargeKernel[i]);
+                    }
+                }
+                else {
+                    for (i = 0; i < SmallKernel.size(); i++) {
+                        tempColor = getColor(img, width, depth, row + SmallKernelRowOffsets[i], col + SmallKernelColOffsets[i]);
+                        resultColor.b += static_cast<int>(tempColor.b * SmallKernel[i]);
+                        resultColor.g += static_cast<int>(tempColor.g * SmallKernel[i]);
+                        resultColor.r += static_cast<int>(tempColor.r * SmallKernel[i]);
+                    }
+                }
 
-// TODO: 何かで判断して実行時に切り替えたい
-#define USE_SMALL_KERNEL 0
-#if USE_SMALL_KERNEL
-    const auto& kernel = SmallKernel;
-    const auto& rowOffsets = SmallKernelRowOffsets;
-    const auto& colOffsets = d == 3 ? SmallKernelColOffsetsBGR : SmallKernelColOffsetsBGRA;
-#else
-    const auto& kernel = LargeKernel;
-    const auto& rowOffsets = LargeKernelRowOffsets;
-    const auto& colOffsets = d == 3 ? LargeKernelColOffsetsBGR : LargeKernelColOffsetsBGRA;
-#endif
+                resultColor.b = std::clamp(resultColor.b, 0x00, 0xff);
+                resultColor.g = std::clamp(resultColor.g, 0x00, 0xff);
+                resultColor.r = std::clamp(resultColor.r, 0x00, 0xff);
 
-    for (row = 1; row < h - 1; row++) {
-        for (col = d; col < w * d - d; col += d) {
-            resultColor = {};
-
-            for (i = 0; i < kernel.size(); i++) {
-                tempColor = getColor(img, w, d, row + rowOffsets[i], col + colOffsets[i]);
-                resultColor.b += static_cast<int>(tempColor.b * kernel[i]);
-                resultColor.g += static_cast<int>(tempColor.g * kernel[i]);
-                resultColor.r += static_cast<int>(tempColor.r * kernel[i]);
+                setColor(img, width, depth, row, col, resultColor);
             }
-
-            resultColor.b = std::clamp(resultColor.b, 0x00, 0xff);
-            resultColor.g = std::clamp(resultColor.g, 0x00, 0xff);
-            resultColor.r = std::clamp(resultColor.r, 0x00, 0xff);
-
-            setColor(img, w, d, row, col, resultColor);
         }
     }
+
+}  // namespace
+
+FilterInfo GaussianFilter::apply(const FilterInfo& info)
+{
+    gaussian_default(info.image.get(), info.width, info.height, info.bitCount / 8, true);
+
+    return FilterInfo { info.width, info.height, info.bitCount, info.image };
 }

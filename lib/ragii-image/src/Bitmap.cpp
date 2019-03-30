@@ -163,6 +163,10 @@ unique_ptr<Bitmap> Bitmap::create(int32_t width, int32_t height, int16_t bitCoun
 
 void Bitmap::save(string path)
 {
+    if (!m_Data) {
+        return;
+    }
+
     auto& info = m_Header.Info;
 
     ofstream fs(path, ios::out | ios::binary);

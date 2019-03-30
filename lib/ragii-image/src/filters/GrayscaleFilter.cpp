@@ -13,17 +13,11 @@ namespace
     constexpr float WEIGHT_R = 0.114478f;
 }  // namespace
 
-void GrayscaleFilter::apply()
+FilterInfo GrayscaleFilter::apply(const FilterInfo& info)
 {
-    int w = m_Params.width;
-    int h = m_Params.height;
-    int d = m_Params.bitCount / 8;
-    uint8_t* img = m_Params.image.get();
-
-    if (d != 4) {
-        cout << "depth " << d << " not supported." << endl;
-        return;
-    }
+    int w = info.width;
+    int h = info.height;
+    auto img = info.image.get();
 
     // 係数
     __m128 weight_b = _mm_set_ps1(WEIGHT_B);
@@ -76,4 +70,6 @@ void GrayscaleFilter::apply()
 
         img += 16;
     }
+
+    return FilterInfo { info.width, info.height, info.bitCount, info.image };
 }

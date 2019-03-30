@@ -10,7 +10,7 @@ namespace ragii
         {
         public:
             virtual ~BinaryFilter() override {}
-            void apply() override;
+            FilterInfo apply(const FilterInfo& info) override;
         };
 
     }  // namespace image
