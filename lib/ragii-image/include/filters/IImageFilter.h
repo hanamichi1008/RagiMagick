@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <cstdint>
+#include <memory>
 
 namespace ragii
 {
@@ -11,7 +12,8 @@ namespace ragii
             int width;
             int height;
             int bitCount;
-            uint8_t* image;
+            //[[deprecated]] uint8_t* image;
+            std::shared_ptr<uint8_t> image;
         };
 
         class IImageFilter
