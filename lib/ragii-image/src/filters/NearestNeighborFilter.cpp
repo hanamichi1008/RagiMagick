@@ -39,7 +39,6 @@ namespace
             return;
         }
 
-        auto src_img = src_info.image;
         auto dst_img = dst_info.image;
         int sx, sy;
 
@@ -48,11 +47,10 @@ namespace
             for (int dx = 0; dx < dst_info.width; dx++) {
                 sx = static_cast<int>(round(dx / ratio));
 
-                auto color = getColor(src_img, src_info.width, src_info.depth, sy, sx);
-                *(dst_img + 0) = color.b;
-                *(dst_img + 1) = color.g;
-                *(dst_img + 2) = color.r;
-
+                auto color = getColor(src_info.image, src_info.width, src_info.depth, sy, sx);
+                dst_img[0] = color.b;
+                dst_img[1] = color.g;
+                dst_img[2] = color.r;
                 dst_img += dst_info.depth;
             }
         }
