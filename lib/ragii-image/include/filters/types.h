@@ -12,7 +12,8 @@ namespace ragii
             Laplacian,
             Gaussian,
             Mosaic,
-            Hsv
+            Hsv,
+            NearestNeighbor
         };
 
     }  // namespace image

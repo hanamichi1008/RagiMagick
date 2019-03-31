@@ -145,6 +145,9 @@ int convert()
     else if (filter == "hsv") {
         BitmapConverter::applyFilter(bmp.get(), FilterType::Hsv);
     }
+    else if (filter == "nn") {
+        bmp->scale(2.5);
+    }
     else {
         cout << "未知のコマンドが指定されています！" << endl;
         return EXIT_FAILURE;

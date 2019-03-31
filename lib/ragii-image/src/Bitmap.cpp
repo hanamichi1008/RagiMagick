@@ -5,6 +5,7 @@
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
 #include "hardware/cpu_info.h"
+#include "filters/NearestNeighborFilter.h"
 
 using namespace ragii;
 using namespace ragii::hardware;
@@ -175,6 +176,36 @@ void Bitmap::save(string path)
     fs.write(reinterpret_cast<char*>(m_Data.get()), info.Width * info.Height * info.BitCount / 8);
     fs.flush();
     fs.close();
+}
+
+void Bitmap::scale(float ratio)
+{
+    if (!m_Data) {
+        return;
+    }
+
+    auto filter_info = FilterInfo { getWidth(), getHeight(), getBitCount(), m_Data };
+    NearestNeighborFilter filter(ratio);
+    filter_info = filter.apply(filter_info);
+
+    m_Data.swap(filter_info.image);
+
+    BitmapFileHeader file = {};
+    file = {};
+    file.Size = BitmapHeaderSize + static_cast<uint32_t>(filter_info.width * filter_info.height * filter_info.bitCount / 8);
+    file.Type = 'B' | ('M' << 8);
+    file.OffBits = BitmapHeaderSize;
+    memcpy(&m_Header.File, &file, BitmapFileHeaderSize);
+
+    BitmapInfoHeader info = {};
+    info.Size = BitmapInfoHeaderSize;
+    info.BitCount = static_cast<uint16_t>(filter_info.bitCount);
+    info.Width = filter_info.width;
+    info.Height = filter_info.height;
+    info.Planes = 1;
+    info.Compression = BI_RGB;
+    info.SizeImage = static_cast<uint32_t>(filter_info.width * filter_info.height * filter_info.bitCount / 8);
+    memcpy(&m_Header.Info, &info, BitmapInfoHeaderSize);
 }
 
 const BitmapHeader& Bitmap::getHeader() const { return m_Header; }

@@ -10,6 +10,7 @@
 #include "filters/IImageFilter.h"
 #include "filters/LaplacianFilter.h"
 #include "filters/MosaicFilter.h"
+#include "filters/NearestNeighborFilter.h"
 #include "filters/NegativeFilter.h"
 
 using namespace std;
@@ -46,6 +47,9 @@ void BitmapConverter::applyFilter(Bitmap* bmp, FilterType type)
             break;
         case FilterType::Hsv:
             filter = make_unique<HsvFilter>();
+            break;
+        case FilterType::NearestNeighbor:
+            filter = make_unique<NearestNeighborFilter>(2.0f);
             break;
     }
 

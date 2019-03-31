@@ -19,6 +19,8 @@ namespace ragii
 
             void save(std::string path);
 
+            void scale(float ratio);
+
             const BitmapHeader& getHeader() const;
 
             decltype(auto) getData() { return m_Data; }
