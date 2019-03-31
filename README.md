@@ -20,10 +20,10 @@ move to the directory which has main.cpp .
 
 ```
 $ pwd
-/${PATH_TO_RAGIMAGICK}/RagiMagick
+/${PATH_TO_RAGIMAGICK}
 
 $ ls
-main.cpp ragii ..etc
+CMakeLists.txt README.md ..etc
 
 $ mkdir build
 $ cd build
@@ -34,7 +34,7 @@ run `cmake` command to create `Makefile` .
 
 ```
 $ pwd
-/${PATH_TO_RAGINMAGICK}/RagiMagick/build
+/${PATH_TO_RAGINMAGICK}/build
 
 $ cmake ../
 ```
