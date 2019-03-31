@@ -57,6 +57,27 @@ namespace
 
         return dst;
     }
+
+    void createBitmapHeader(BitmapFileHeader& fileHeader, BitmapInfoHeader& infoHeader, int width, int height, int16_t bitCount)
+    {
+        BitmapFileHeader file = {};
+        file = {};
+        file.Size = BitmapHeaderSize + static_cast<uint32_t>(width * height * bitCount / 8);
+        file.Type = 'B' | ('M' << 8);
+        file.OffBits = BitmapHeaderSize;
+        memcpy(&fileHeader, &file, BitmapFileHeaderSize);
+
+        BitmapInfoHeader info = {};
+        info.Size = BitmapInfoHeaderSize;
+        info.BitCount = static_cast<uint16_t>(bitCount);
+        info.Width = width;
+        info.Height = height;
+        info.Planes = 1;
+        info.Compression = BI_RGB;
+        info.SizeImage = static_cast<uint32_t>(width * height * bitCount / 8);
+        memcpy(&infoHeader, &info, BitmapInfoHeaderSize);
+    }
+
 }  // namespace
 
 unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
@@ -184,28 +205,13 @@ void Bitmap::scale(float ratio)
         return;
     }
 
-    auto filter_info = FilterInfo { getWidth(), getHeight(), getBitCount(), m_Data };
+    auto info = FilterInfo { getWidth(), getHeight(), getBitCount(), m_Data };
     NearestNeighborFilter filter(ratio);
-    filter_info = filter.apply(filter_info);
+    info = filter.apply(info);
 
-    m_Data.swap(filter_info.image);
+    m_Data.swap(info.image);
 
-    BitmapFileHeader file = {};
-    file = {};
-    file.Size = BitmapHeaderSize + static_cast<uint32_t>(filter_info.width * filter_info.height * filter_info.bitCount / 8);
-    file.Type = 'B' | ('M' << 8);
-    file.OffBits = BitmapHeaderSize;
-    memcpy(&m_Header.File, &file, BitmapFileHeaderSize);
-
-    BitmapInfoHeader info = {};
-    info.Size = BitmapInfoHeaderSize;
-    info.BitCount = static_cast<uint16_t>(filter_info.bitCount);
-    info.Width = filter_info.width;
-    info.Height = filter_info.height;
-    info.Planes = 1;
-    info.Compression = BI_RGB;
-    info.SizeImage = static_cast<uint32_t>(filter_info.width * filter_info.height * filter_info.bitCount / 8);
-    memcpy(&m_Header.Info, &info, BitmapInfoHeaderSize);
+    createBitmapHeader(m_Header.File, m_Header.Info, info.width, info.height, info.bitCount);
 }
 
 const BitmapHeader& Bitmap::getHeader() const { return m_Header; }
