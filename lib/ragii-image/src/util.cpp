@@ -82,7 +82,7 @@ namespace ragii::image
             return nullptr;
         }
 
-        int32_t stride = static_cast<int32_t>(PNG_IMAGE_ROW_STRIDE(image));
+        int32_t stride = -static_cast<int32_t>(PNG_IMAGE_ROW_STRIDE(image));
 
         ret = png_image_finish_read(&image, nullptr, bmp->getData().get(), stride, nullptr);
         if (ret == 0) {
