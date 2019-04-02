@@ -14,58 +14,57 @@ namespace ragii::hardware
         uint32_t edx;
     };
 
-    class CpuVendor
-    {
-    public:
-        CpuVendor(const CpuRegister& reg)
-        {
-            char buf[sizeof(uint32_t) + 1] = {};
-            text::arithmetic_to_str(reg.ebx, buf);
-            m_Name += buf;
-            text::arithmetic_to_str(reg.edx, buf);
-            m_Name += buf;
-            text::arithmetic_to_str(reg.ecx, buf);
-            m_Name += buf;
-        }
-
-        std::string getName() { return m_Name; }
-
-        static constexpr bool isIntel(const CpuRegister& reg)
-        {
-            return text::str_to_number<uint32_t>("Genu") == reg.ebx &&
-                   text::str_to_number<uint32_t>("ineI") == reg.edx &&
-                   text::str_to_number<uint32_t>("ntel") == reg.ecx;
-        }
-
-    private:
-        std::string m_Name;
-    };
-
-    class CpuAvailableFeatures
-    {
-    public:
-        CpuAvailableFeatures(const CpuRegister& reg)
-            : m_Register(reg)
-        {
-        }
-
-        inline bool sse() { return (m_Register.edx & (1 << 25)) != 0; }
-        inline bool sse2() { return (m_Register.edx & (1 << 26)) != 0; }
-        inline bool sse3() { return (m_Register.ecx & 1) != 0; }
-        inline bool ssse3() { return (m_Register.ecx & (1 << 9)) != 0; }
-        inline bool sse41() { return (m_Register.ecx & (1 << 19)) != 0; }
-        inline bool sse42() { return (m_Register.ecx & (1 << 20)) != 0; }
-        inline bool avx() { return (m_Register.ecx & (1 << 28)) != 0; }
-        inline bool avx2() { return (m_Register.ebx & (1 << 5)) != 0; }
-
-    private:
-        CpuRegister m_Register;
-    };
-
     class CpuInfo
     {
     public:
-        CpuRegister load(uint32_t param);
+        static void load();
+        static std::string getVendorName();
+
+        static inline bool isIntel()
+        {
+            return text::str_to_number<uint32_t>("Genu") == m_ID0.ebx &&
+                   text::str_to_number<uint32_t>("ineI") == m_ID0.edx &&
+                   text::str_to_number<uint32_t>("ntel") == m_ID0.ecx;
+        }
+
+        static inline bool isAMD()
+        {
+            return text::str_to_number<uint32_t>("Auth") == m_ID0.ebx &&
+                   text::str_to_number<uint32_t>("enti") == m_ID0.edx &&
+                   text::str_to_number<uint32_t>("cAMD") == m_ID0.ecx;
+        }
+
+        static inline bool mmx() { return (m_ID1.edx & (1 << 23)) != 0; }
+        static inline bool sse() { return (m_ID1.edx & (1 << 25)) != 0; }
+        static inline bool sse2() { return (m_ID1.edx & (1 << 26)) != 0; }
+        static inline bool sse3() { return (m_ID1.ecx & 1) != 0; }
+        static inline bool ssse3() { return (m_ID1.ecx & (1 << 9)) != 0; }
+        static inline bool fma() { return (m_ID1.ecx & (1 << 12)) != 0; }
+        static inline bool sse41() { return (m_ID1.ecx & (1 << 19)) != 0; }
+        static inline bool sse42() { return (m_ID1.ecx & (1 << 20)) != 0; }
+        static inline bool avx() { return (m_ID1.ecx & (1 << 28)) != 0; }
+        static inline bool avx2() { return (m_ID7.ebx & (1 << 5)) != 0; }
+        static inline bool avx512() { return avx512f(); }
+        static inline bool avx512f() { return (m_ID7.ebx & (1 << 16)) != 0; }
+        static inline bool avx512dq() { return (m_ID7.ebx & (1 << 17)) != 0; }
+        static inline bool avx512ifma52() { return (m_ID7.ebx & (1 << 21)) != 0; }
+        static inline bool avx512pf() { return (m_ID7.ebx & (1 << 26)) != 0; }
+        static inline bool avx512er() { return (m_ID7.ebx & (1 << 27)) != 0; }
+        static inline bool avx512cd() { return (m_ID7.ebx & (1 << 28)) != 0; }
+        static inline bool avx512bw() { return (m_ID7.ebx & (1 << 30)) != 0; }
+        static inline bool avx512vl() { return (m_ID7.ebx & (1 << 31)) != 0; }
+        static inline bool avx512vbmi() { return (m_ID7.ecx & (1 << 1)) != 0; }
+
+        static inline bool htt() { return (m_ID1.edx & (1 << 26)) != 0; }
+
+    private:
+        static CpuRegister load(uint32_t param);
+
+        static CpuRegister m_ID0;
+        static CpuRegister m_ID1;
+        static CpuRegister m_ID7;
+
+        static std::string m_VendorName;
     };
 
 }  // namespace ragii::hardware

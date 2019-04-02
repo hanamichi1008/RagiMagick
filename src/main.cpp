@@ -33,18 +33,32 @@ int main(int argc, char* argv[])
 
 void dumpSystemInfo()
 {
-    CpuInfo info;
-    cout << CpuVendor(info.load(0)).getName() << endl;
+    CpuInfo::load();
 
-    auto reg = info.load(1);
-    CpuAvailableFeatures features(reg);
-    cout << "sse:   " << features.sse() << endl;
-    cout << "sse2:  " << features.sse2() << endl;
-    cout << "sse3:  " << features.sse3() << endl;
-    cout << "sse41: " << features.sse41() << endl;
-    cout << "sse42: " << features.sse42() << endl;
-    cout << "avx:   " << features.avx() << endl;
-    cout << "avx2:  " << features.avx2() << endl;
+    cout << CpuInfo::getVendorName() << endl;
+    cout << "htt          : " << CpuInfo::htt() << endl;
+    cout << "fma          : " << CpuInfo::fma() << endl;
+    cout << "mmx          : " << CpuInfo::mmx() << endl;
+    cout << "sse          : " << CpuInfo::sse() << endl;
+    cout << "sse2         : " << CpuInfo::sse2() << endl;
+    cout << "sse3         : " << CpuInfo::sse3() << endl;
+    cout << "ssse3        : " << CpuInfo::ssse3() << endl;
+    cout << "sse41        : " << CpuInfo::sse41() << endl;
+    cout << "sse42        : " << CpuInfo::sse42() << endl;
+    cout << "avx          : " << CpuInfo::avx() << endl;
+    cout << "avx2         : " << CpuInfo::avx2() << endl;
+    cout << "avx512       : " << CpuInfo::avx512() << endl;
+    cout << "- - - - - - - - - - - - - - - - - - " << endl;
+    cout << "avx512f      : " << CpuInfo::avx512f() << endl;
+    cout << "avx512dq     : " << CpuInfo::avx512dq() << endl;
+    cout << "avx512ifma52 : " << CpuInfo::avx512ifma52() << endl;
+    cout << "avx512pf     : " << CpuInfo::avx512pf() << endl;
+    cout << "avx512er     : " << CpuInfo::avx512er() << endl;
+    cout << "avx512cd     : " << CpuInfo::avx512cd() << endl;
+    cout << "avx512bw     : " << CpuInfo::avx512bw() << endl;
+    cout << "avx512vl     : " << CpuInfo::avx512vl() << endl;
+    cout << "avx512vbmi   : " << CpuInfo::avx512vbmi() << endl;
+    cout << "- - - - - - - - - - - - - - - - - - " << endl;
 }
 
 int process(int argc, char* argv[])

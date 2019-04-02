@@ -37,19 +37,19 @@ namespace
 
     inline auto bgr24_to_bgra32(uint8_t* src, int width, int height)
     {
-        CpuInfo info;
-        auto reg = info.load(1);
-        CpuAvailableFeatures features(reg);
-
-        features = CpuAvailableFeatures({}); // debug
-
         unique_ptr<uint8_t, aligned_deleter<uint8_t>> dst;
 
-        if (features.avx2()) {
+        if (CpuInfo::avx2()) {
+            // TODO: avx2
+            dst = bgr24_to_bgra32_default(src, width, height);
         }
-        else if (features.avx()) {
+        else if (CpuInfo::avx()) {
+            // TODO: avx
+            dst = bgr24_to_bgra32_default(src, width, height);
         }
-        else if (features.sse42()) {
+        else if (CpuInfo::sse42()) {
+            // TODO: sse
+            dst = bgr24_to_bgra32_default(src, width, height);
         }
         else {
             dst = bgr24_to_bgra32_default(src, width, height);

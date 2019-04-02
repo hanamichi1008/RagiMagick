@@ -102,18 +102,14 @@ FilterInfo BinaryFilter::apply(const FilterInfo& info)
     int d = info.bitCount / 8;
     auto img = info.image.get();
 
-    CpuInfo cpu_info;
-    auto reg = cpu_info.load(1);
-    CpuAvailableFeatures features(reg);
-
-    if (features.avx2()) {
+    if (CpuInfo::avx2()) {
         binary_avx2(img, w, h, d);
     }
-    else if (features.avx()) {
+    else if (CpuInfo::avx()) {
         // TODO: avx
         binary_sse42(img, w, h, d);
     }
-    else if (features.sse42()) {
+    else if (CpuInfo::sse42()) {
         binary_sse42(img, w, h, d);
     }
     else {
