@@ -1,5 +1,6 @@
 ### dir
 .vs
+.vscode
 # For Compiling with CMake
 build/
 
