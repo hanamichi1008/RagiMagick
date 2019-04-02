@@ -5,7 +5,8 @@
 #include <memory>
 #include "ragii/include/text/text.h"
 
-namespace RagiMagick {
+namespace RagiMagick
+{
 
     class CommandLine
     {
@@ -51,23 +52,21 @@ namespace RagiMagick {
         }
 
         template<typename T,
-            typename std::enable_if<
-                std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>,
-                std::nullptr_t>::type = nullptr
-        >
+                 typename std::enable_if<
+                     std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>,
+                     std::nullptr_t>::type = nullptr>
         inline T getValue(std::string_view key)
         {
             return ragii::text::str_to_arithmetic<T>(m_Opts[key.data()].c_str());
         }
 
         template<typename T,
-            typename std::enable_if<
-                std::is_same_v<T, std::string>,
-                std::nullptr_t>::type = nullptr
-        >
+                 typename std::enable_if<
+                     std::is_same_v<T, std::string>,
+                     std::nullptr_t>::type = nullptr>
         inline T getValue(std::string_view key)
         {
-            return m_Opts[key.data()].c_str();
+            return m_Opts[key.data()];
         }
 
     private:
@@ -75,4 +74,4 @@ namespace RagiMagick {
         std::map<std::string, std::string> m_Opts;
     };
 
-}
+}  // namespace RagiMagick
