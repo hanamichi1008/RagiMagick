@@ -35,6 +35,19 @@ CpuRegister CpuInfo::load(uint32_t param)
 {
     uint32_t a, b, c, d = 0;
 
+#if defined(_MSC_VER)
+    __asm {
+        mov eax, param
+        mov ebx, 0
+        mov ecx, 0
+        mov edx, 0
+        cpuid
+        mov a, eax
+        mov b, ebx
+        mov c, ecx
+        mov d, edx
+    }
+#else
     asm volatile(
         "movl %0, %%eax \n"
         "movl $0, %%ebx \n"
@@ -43,6 +56,7 @@ CpuRegister CpuInfo::load(uint32_t param)
         "cpuid \n"
         : "=a"(a), "=b"(b), "=c"(c), "=d"(d)
         : "a"(param));
+#endif
 
     return { a, b, c, d };
 }
