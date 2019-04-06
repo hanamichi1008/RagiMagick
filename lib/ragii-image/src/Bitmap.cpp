@@ -134,8 +134,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
     fs.read(reinterpret_cast<char*>(src.get()), dataSize);
 
     // TODO: 16, 8
-    if (bmp->getBitCount() == 24)
-    {
+    if (bmp->getBitCount() == 24) {
         auto& file = bmp->m_Header.File;
         auto& info = bmp->m_Header.Info;
 
@@ -147,8 +146,7 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
         info.BitCount = 32;
         info.SizeImage = static_cast<uint32_t>(info.Width * info.Height * 32 / 8);
     }
-    else
-    {
+    else {
         bmp->m_Data = move(src);
     }
 

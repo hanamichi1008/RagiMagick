@@ -24,7 +24,6 @@ namespace
         };
     }
 
-
     struct ImageInfo
     {
         uint8_t* image;

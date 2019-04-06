@@ -19,7 +19,7 @@ namespace
             img += 16;
         }
     }
-}
+}  // namespace
 
 FilterInfo NegativeFilter::apply(const FilterInfo& info)
 {
