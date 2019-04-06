@@ -13,13 +13,35 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 project(RagiMagick CXX)
 
+# ==================================================
+# external tool settings
+# ==================================================
 # code format
 include(CodeFormat.cmake)
 set(RAGIMAGICK_CODE_FORMAT_TARGET_NAME "${CMAKE_PROJECT_NAME}_code-format")
 format_code(${RAGIMAGICK_CODE_FORMAT_TARGET_NAME})
 
 # ==================================================
-# コンパイルオプション
+# compiler & IDE check
+# ==================================================
+# compiler
+set(RAGIMAGICK_COMPILER_IS_CLANG FALSE)
+set(RAGIMAGICK_COMPILER_IS_GNU FALSE)
+set(RAGIMAGICK_COMPILER_IS_MSVC FALSE)
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    set(RAGIMAGICK_COMPILER_IS_CLANG TRUE)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(RAGIMAGICK_COMPILER_IS_GNU TRUE)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(RAGIMAGICK_COMPILER_IS_MSVC TRUE)
+endif()
+
+message("RAGIMAGICK_COMPILER_IS_CLANG: ${RAGIMAGICK_COMPILER_IS_CLANG}")
+message("RAGIMAGICK_COMPILER_IS_GNU: ${RAGIMAGICK_COMPILER_IS_GNU}")
+message("RAGIMAGICK_COMPILER_IS_MSVC: ${RAGIMAGICK_COMPILER_IS_MSVC}")
+
+# ==================================================
+# compiler options
 # ==================================================
 
 if (MSVC)
@@ -35,7 +57,7 @@ source_group("Headers" FILES src/CommandLine.h)
 source_group("Sources" FILES src/main.cpp)
 
 # ==================================================
-# ライブラリのロード
+# library settings
 # ==================================================
 
 set(RAGIMAGICK_EXTERNALLIB_DIR "${CMAKE_CURRENT_LIST_DIR}/external_lib")
@@ -54,9 +76,7 @@ add_subdirectory(lib/ragii)
 message("[${CMAKE_PROJECT_NAME}] start add_subdirectory lib/ragii-image")
 add_subdirectory(lib/ragii-image)
 
-# ==================================================
-# ライブラリのリンク
-# ==================================================
+# links
 add_executable(RagiMagick src/main.cpp)
 if(MSVC)
     target_link_libraries(RagiMagick ${RAGIMAGICK_EXTERNALLIB_LIBJPEG_TURBO_CACHE}/Debug/turbojpeg-static.lib)
@@ -69,8 +89,12 @@ else()
 endif()
 target_link_libraries(RagiMagick ragii ragii-image)
 
-# ライブラリのインクルード
+# includes
 target_include_directories(RagiMagick PRIVATE "lib")
+
+# ==================================================
+# 後処理
+# ==================================================
 
 # 依存関係を設定
 # コードフォーマットが最初に実行されるよう、各ターゲットが RAGIMAGICK_CODE_FORMAT_TARGET_NAME に依存するよう設定している
