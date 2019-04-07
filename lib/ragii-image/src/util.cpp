@@ -6,6 +6,7 @@
 #include <png.h>
 #include "Bitmap.h"
 #include "util.h"
+#include "common.h"
 
 using namespace std;
 
@@ -19,38 +20,33 @@ namespace ragii::image
         }
 
         jpeg_error_mgr err_mgr = {};
-        jpeg_decompress_struct decompress_info = {};
-        jpeg_create_decompress(&decompress_info);
-        decompress_info.err = jpeg_std_error(&err_mgr);
-        decompress_info.do_block_smoothing = FALSE;
-        decompress_info.do_fancy_upsampling = FALSE;
+        jpeg_decompress_struct cinfo = {};
+        jpeg_create_decompress(&cinfo);
+        cinfo.err = jpeg_std_error(&err_mgr);
+        cinfo.do_block_smoothing = FALSE;
+        cinfo.do_fancy_upsampling = FALSE;
 
-        jpeg_stdio_src(&decompress_info, fp.get());
-        jpeg_read_header(&decompress_info, TRUE);
-        jpeg_start_decompress(&decompress_info);
+        jpeg_stdio_src(&cinfo, fp.get());
+        jpeg_read_header(&cinfo, TRUE);
+        jpeg_start_decompress(&cinfo);
 
-        auto bmp =
-            Bitmap::create(
-                static_cast<int32_t>(decompress_info.output_width),
-                static_cast<int32_t>(decompress_info.output_height),
-                static_cast<int16_t>(decompress_info.output_components * 8));
+        size_t alloc_size = cinfo.output_width * cinfo.output_height * static_cast<size_t>(cinfo.output_components);
+        unique_aligned_ptr img = allocate(alloc_size, 16);
 
-        if (!bmp) {
-            return nullptr;
-        }
-
-        auto img = bmp->getData().get();
         size_t lines = 0;
-        size_t stride = decompress_info.output_width * static_cast<size_t>(decompress_info.output_components);
+        size_t stride = cinfo.output_width * static_cast<size_t>(cinfo.output_components);
+        auto img_ptr = img.get();
 
-        while (decompress_info.output_scanline < decompress_info.output_height) {
-            lines = jpeg_read_scanlines(&decompress_info, reinterpret_cast<JSAMPARRAY>(&img), 1);
-            img += lines * stride;
+        while (cinfo.output_scanline < cinfo.output_height) {
+            lines = jpeg_read_scanlines(&cinfo, reinterpret_cast<JSAMPARRAY>(&img), 1);
+            img_ptr += lines * stride;
         }
 
-        jpeg_finish_decompress(&decompress_info);
-        jpeg_destroy_decompress(&decompress_info);
+        jpeg_finish_decompress(&cinfo);
+        jpeg_destroy_decompress(&cinfo);
 
+        auto new_img = bgr24_to_bgra32(img.get(), cinfo.output_width, cinfo.output_height);
+        auto bmp = Bitmap::loadFromRawData(cinfo.output_width, cinfo.output_height, 32, move(new_img));
         return bmp;
     }
 
@@ -70,27 +66,28 @@ namespace ragii::image
             return nullptr;
         }
 
+        int width = image.width;
+        int height = image.height;
         size_t components = PNG_IMAGE_PIXEL_CHANNELS(image.format);
-
-        auto bmp =
-            Bitmap::create(
-                static_cast<int32_t>(image.width),
-                static_cast<int32_t>(image.height),
-                static_cast<int16_t>(components * 8));
-
-        if (!bmp) {
-            return nullptr;
-        }
+        size_t alloc_size = width * height * static_cast<size_t>(components);
+        unique_aligned_ptr img = allocate(alloc_size, 16);
 
         int32_t stride = -static_cast<int32_t>(PNG_IMAGE_ROW_STRIDE(image));
 
-        ret = png_image_finish_read(&image, nullptr, bmp->getData().get(), stride, nullptr);
+        ret = png_image_finish_read(&image, nullptr, img.get(), stride, nullptr);
         if (ret == 0) {
             return nullptr;
         }
 
         png_image_free(&image);
 
+        if (components == 3) {
+            auto new_img = bgr24_to_bgra32(img.get(), width, height);
+            auto bmp = Bitmap::loadFromRawData(width, height, 32, move(new_img));
+            return bmp;
+        }
+
+        auto bmp = Bitmap::loadFromRawData(width, height, components * 8, move(img));
         return bmp;
     }
 

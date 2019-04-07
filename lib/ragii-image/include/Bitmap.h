@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include "memory/memory.h"
+#include "common.h"
 #include "formats/bitmap/BitmapHeader.h"
 
 namespace ragii
@@ -15,7 +15,8 @@ namespace ragii
             using ImagePtr = std::shared_ptr<uint8_t>;
 
             static std::unique_ptr<Bitmap> loadFromFile(std::string path);
-            static std::unique_ptr<Bitmap> create(int32_t width, int32_t height, int16_t bitCount = 24);
+            static std::unique_ptr<Bitmap> loadFromRawData(int32_t width, int32_t height, int16_t bitCount, ImagePtr data);
+            static std::unique_ptr<Bitmap> create(int32_t width, int32_t height, int16_t bitCount);
 
             void save(std::string path);
 

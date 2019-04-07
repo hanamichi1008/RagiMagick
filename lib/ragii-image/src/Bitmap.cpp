@@ -4,60 +4,15 @@
 #include "Bitmap.h"
 #include "formats/bitmap/BitmapFileHeader.h"
 #include "formats/bitmap/BitmapInfoHeader.h"
-#include "hardware/cpu_info.h"
 #include "filters/NearestNeighborFilter.h"
+#include "common.h"
 
 using namespace ragii;
-using namespace ragii::hardware;
 using namespace ragii::image;
 using namespace std;
 
 namespace
 {
-    inline auto bgr24_to_bgra32_default(uint8_t* src, int width, int height)
-    {
-        auto dst = aligned_allocator<uint8_t>::make_unique(width * height * 4, 16);
-        auto p = dst.get();
-
-#if defined(__clang__)
-#    pragma clang loop vectorize(disable)
-#elif defined(_MSC_VER)
-#    pragma loop(no_vector)
-#endif
-        for (int i = 0; i < width * height * 3; i += 3) {
-            p[0] = src[i + 0];
-            p[1] = src[i + 1];
-            p[2] = src[i + 2];
-            p[3] = 0;
-            p += 4;
-        }
-
-        return dst;
-    }
-
-    inline auto bgr24_to_bgra32(uint8_t* src, int width, int height)
-    {
-        unique_ptr<uint8_t, aligned_deleter<uint8_t>> dst;
-
-        if (CpuInfo::avx2()) {
-            // TODO: avx2
-            dst = bgr24_to_bgra32_default(src, width, height);
-        }
-        else if (CpuInfo::avx()) {
-            // TODO: avx
-            dst = bgr24_to_bgra32_default(src, width, height);
-        }
-        else if (CpuInfo::sse42()) {
-            // TODO: sse
-            dst = bgr24_to_bgra32_default(src, width, height);
-        }
-        else {
-            dst = bgr24_to_bgra32_default(src, width, height);
-        }
-
-        return dst;
-    }
-
     void createBitmapHeader(BitmapFileHeader& fileHeader, BitmapInfoHeader& infoHeader, int width, int height, int16_t bitCount)
     {
         BitmapFileHeader file = {};
@@ -152,6 +107,14 @@ unique_ptr<Bitmap> Bitmap::loadFromFile(string path)
 
     fs.close();
 
+    return bmp;
+}
+
+unique_ptr<Bitmap> Bitmap::loadFromRawData(int32_t width, int32_t height, int16_t bitCount, ImagePtr data)
+{
+    auto bmp = make_unique<Bitmap>();
+    createBitmapHeader(bmp->m_Header.File, bmp->m_Header.Info, width, height, bitCount);
+    bmp->m_Data.swap(data);
     return bmp;
 }
 
