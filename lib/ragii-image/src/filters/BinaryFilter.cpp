@@ -11,13 +11,6 @@ using namespace ragii::hardware;
 
 namespace
 {
-    // 符号"無し" 8ビット整数16個の比較
-    // TODO: gt じゃなくて gte が簡単にできてしまったので gte で。後に gt 版を作る。
-    inline __m128i ragii_cmpgte_epu8(__m128i a, __m128i b)
-    {
-        return _mm_cmpeq_epi8(_mm_max_epu8(a, b), a);
-    }
-
     inline uint8_t search_average(uint8_t* img, int w, int h, int d)
     {
         uint8_t result = 0;
@@ -64,7 +57,7 @@ namespace
             // ロード (32bit * 4px = 128bit)
             src = _mm_load_si128(reinterpret_cast<__m128i*>(img));
             // BGR各成分で閾値を超えているかチェック
-            dst = ragii_cmpgte_epu8(src, th1);
+            dst = simd::cmpgte_epu8(src, th1);
             // BGRA 全てが 0 なら 0x00000000、そうでなければ 0xffffffff になる
             dst = _mm_cmpgt_epi32(dst, th2);
             _mm_store_si128(reinterpret_cast<__m128i*>(img), dst);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // include
 #if defined(_MSC_VER)
@@ -19,8 +19,6 @@
 #include "hardware/cpu_info.h"
 #include "memory/memory.h"
 
-#define RAGII_IMAGE_EXTERN_C extern "C"
-
 namespace ragii::image
 {
     using unique_aligned_ptr = std::unique_ptr<uint8_t, aligned_deleter<uint8_t>>;
@@ -37,4 +35,13 @@ namespace ragii::image
 
     unique_aligned_ptr bgr24_to_bgra32_default(uint8_t* src, int width, int height);
     unique_aligned_ptr bgr24_to_bgra32(uint8_t* src, int width, int height);
-}
+}  // namespace ragii::image
+
+namespace ragii::image::simd
+{
+    // 符号"無し" 8ビット整数16個の比較
+    inline __m128i cmpgte_epu8(__m128i a, __m128i b)
+    {
+        return _mm_cmpeq_epi8(_mm_max_epu8(a, b), a);
+    }
+}  // namespace ragii::image::simd
