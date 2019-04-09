@@ -33,6 +33,57 @@ namespace ragii::image
         return aligned_allocator<uint8_t>::make_unique(size, alignment);
     }
 
+    struct Color
+    {
+        int b;
+        int g;
+        int r;
+        int a;
+    };
+
+    inline Color getColor(const uint8_t* img, int width, int depth, int row, int col)
+    {
+        int offset = row * width * depth + col;
+        Color color = {};
+
+        if (depth == 3) {
+            color.b = *(img + (offset + 0));
+            color.g = *(img + (offset + 1));
+            color.r = *(img + (offset + 2));
+        }
+        else if (depth == 4) {
+            color.b = *(img + (offset + 0));
+            color.g = *(img + (offset + 1));
+            color.r = *(img + (offset + 2));
+            color.a = *(img + (offset + 3));
+        }
+        else {
+            // TODO:
+        }
+
+        return color;
+    }
+
+    inline void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
+    {
+        int offset = row * width * depth + col;
+
+        if (depth == 3) {
+            *(img + (offset + 0)) = static_cast<uint8_t>(color.b);
+            *(img + (offset + 1)) = static_cast<uint8_t>(color.g);
+            *(img + (offset + 2)) = static_cast<uint8_t>(color.r);
+        }
+        else if (depth == 4) {
+            *(img + (offset + 0)) = static_cast<uint8_t>(color.b);
+            *(img + (offset + 1)) = static_cast<uint8_t>(color.g);
+            *(img + (offset + 2)) = static_cast<uint8_t>(color.r);
+            *(img + (offset + 3)) = static_cast<uint8_t>(color.a);
+        }
+        else {
+            // TODO:
+        }
+    }
+
     unique_aligned_ptr bgr24_to_bgra32_default(uint8_t* src, int width, int height);
     unique_aligned_ptr bgr24_to_bgra32(uint8_t* src, int width, int height);
 }  // namespace ragii::image

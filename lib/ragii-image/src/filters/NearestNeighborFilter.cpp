@@ -8,22 +8,6 @@ using namespace ragii::image;
 
 namespace
 {
-    struct Color
-    {
-        int b;
-        int g;
-        int r;
-    };
-
-    Color getColor(const uint8_t* img, int width, int depth, int row, int col)
-    {
-        return Color {
-            *(img + (row * width * depth + col * depth + 0)),
-            *(img + (row * width * depth + col * depth + 1)),
-            *(img + (row * width * depth + col * depth + 2))
-        };
-    }
-
     struct ImageInfo
     {
         uint8_t* image;
@@ -46,7 +30,7 @@ namespace
             for (int dx = 0; dx < dst_info.width; dx++) {
                 sx = static_cast<int>(round(dx / ratio));
 
-                auto color = getColor(src_info.image, src_info.width, src_info.depth, sy, sx);
+                auto color = getColor(src_info.image, src_info.width, src_info.depth, sy, sx * src_info.depth);
                 dst_img[0] = color.b;
                 dst_img[1] = color.g;
                 dst_img[2] = color.r;

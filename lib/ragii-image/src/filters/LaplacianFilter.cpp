@@ -4,6 +4,7 @@
 #include <memory>
 #include "memory/memory.h"
 #include "LaplacianFilter.h"
+#include "common.h"
 
 using namespace std;
 using namespace ragii;
@@ -11,26 +12,6 @@ using namespace ragii::image;
 
 namespace
 {
-    struct Color
-    {
-        int b;
-        int g;
-        int r;
-    };
-
-    Color getColor(const uint8_t* img, int width, int depth, int row, int col)
-    {
-        return Color { *(img + (row * width * depth + col + 0)), *(img + (row * width * depth + col + 1)),
-                       *(img + (row * width * depth + col + 2)) };
-    }
-
-    void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
-    {
-        *(img + (row * width * depth + col + 0)) = static_cast<uint8_t>(color.b);
-        *(img + (row * width * depth + col + 1)) = static_cast<uint8_t>(color.g);
-        *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
-    }
-
     // clang-format off
     constexpr array<int, 9> Kernel = {
         -1, -1, -1,

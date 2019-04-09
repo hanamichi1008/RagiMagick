@@ -65,29 +65,6 @@ namespace
         -8, -4, 0, 4, 8
     };
 
-    struct Color
-    {
-        int b;
-        int g;
-        int r;
-    };
-
-    Color getColor(const uint8_t* img, int width, int depth, int row, int col)
-    {
-        return Color {
-            *(img + (row * width * depth + col + 0)),
-            *(img + (row * width * depth + col + 1)),
-            *(img + (row * width * depth + col + 2))
-        };
-    }
-
-    void setColor(uint8_t* img, int width, int depth, int row, int col, const Color& color)
-    {
-        *(img + (row * width * depth + col + 0)) = static_cast<uint8_t>(color.b);
-        *(img + (row * width * depth + col + 1)) = static_cast<uint8_t>(color.g);
-        *(img + (row * width * depth + col + 2)) = static_cast<uint8_t>(color.r);
-    }
-
     inline void gaussian_default(uint8_t* img, int width, int height, int depth, bool use_large_kernel)
     {
         int row, col = 0;
